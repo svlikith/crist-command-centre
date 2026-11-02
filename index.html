@@ -808,46 +808,67 @@ function submitChat() {
       submitChat();
     }
 
-    function submitChat() {
-      const input = document.getElementById('chat-input');
-      const text = input.value.trim();
-      if (!text) return;
+    
+async function submitChat() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
 
-      const container = document.getElementById('chat-messages');
+  const container = document.getElementById('chat-messages');
 
-      // User Bubble
-      const userBubble = document.createElement('div');
-      userBubble.className = 'chat-bubble bubble-user';
-      userBubble.innerText = text;
-      container.appendChild(userBubble);
-      input.value = '';
+  const userBubble = document.createElement('div');
+  userBubble.className = 'chat-bubble bubble-user';
+  userBubble.innerText = text;
+  container.appendChild(userBubble);
+  input.value = '';
 
-      // AI Response with Concept Guardrail
-      setTimeout(() => {
-        const aiBubble = document.createElement('div');
-        aiBubble.className = 'chat-bubble bubble-ai';
+  const aiBubble = document.createElement('div');
+  aiBubble.className = 'chat-bubble bubble-ai';
+  aiBubble.innerText = 'CRIST AI is thinking...';
+  container.appendChild(aiBubble);
+  container.scrollTop = container.scrollHeight;
 
-        let reply = "";
-        const lower = text.toLowerCase();
+  try {
+    const response = await fetch(
+      'https://crist-ai-backend.svlikith56.workers.dev',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message: text })
+      }
+    );
 
-        if (lower.includes('800v') || lower.includes('packaging')) {
-          reply = "<strong>[RECOMMENDATION]</strong> An 800V silicon carbide (SiC) inverter architecture allows reduced copper wire cross-sections and quicker heat recovery during high-load track sessions.<br><br><strong>[ASSUMPTION]</strong> We must assume battery pack costs will run ~18% higher than standard 400V COTS modules until supplier quotes are obtained.";
-        } else if (lower.includes('outreach') || lower.includes('angel') || lower.includes('investor')) {
-          reply = "<strong>[DRAFT OUTREACH]</strong><br><em>'Hi [Name], I am the founder of CRIST Motors. We are currently developing the conceptual engineering thesis and aero packaging for the GT-01 luxury performance EV. We are raising our pre-seed round strictly to fund CAE/CFD digital simulation and recruit core engineering advisors. Let me know if you would review our draft deck.'</em><br><br><strong>[NOTE]</strong> No messages are sent automatically. Copy and modify as needed.";
-        } else if (lower.includes('risk') || lower.includes('audit')) {
-          reply = "<strong>[AUDIT ALERT]</strong> Critical risk area: Ensure all external discussions clearly state that CRIST Motors is at <em>virtual concept stage</em> with zero physical prototypes built, zero validated wind tunnel figures, and no institutional commitments.";
-        } else {
-          reply = `<strong>[STRATEGIC ANALYSIS]</strong> Received: "${text}".<br><br>As your Co-Founder AI, I recommend testing this through our concept-stage framework: (1) Does it impact packaging weight? (2) Does it require pre-seed capital? (3) Is this a proven fact or an assumption?`;
-        }
+    const data = await response.json();
 
-        aiBubble.innerHTML = reply;
-        container.appendChild(aiBubble);
-        container.scrollTop = container.scrollHeight;
-        logActivity(`AI Query: "${text.substring(0, 30)}..."`);
-      }, 450);
-
-      container.scrollTop = container.scrollHeight;
+    if (!response.ok) {
+      throw new Error(data.error || `Server error: ${response.status}`);
     }
+
+    const reply =
+      data.reply ||
+      data.response ||
+      data.text ||
+      data.message;
+
+    if (!reply) {
+      throw new Error('The backend did not return an AI reply.');
+    }
+
+    aiBubble.innerText = reply;
+    logActivity(`AI Query: "${text.substring(0, 30)}..."`);
+
+  } catch (error) {
+    aiBubble.innerText =
+      'Connection error: ' + error.message +
+      '. Check that the Cloudflare Worker accepts POST requests and allows this website through CORS.';
+    console.error('CRIST AI error:', error);
+  }
+
+  container.scrollTop = container.scrollHeight;
+}
+
 
     // Export App State
     function exportAppState() {
