@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CRIST AI — Command Centre</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#050912">
+<style>
+:root{--bg:#04070E;--bg2:#08101E;--panel:rgba(12,20,36,.78);--line:rgba(120,170,230,.16);--blue:#2CC4FF;--blue2:#0A84FF;
+--ti:#A9B6C9;--mu:#6B7A90;--tx:#F4F8FD;--ok:#34D399;--bad:#F87171;--r:16px;--pad:16px}
+body.compact{--pad:11px;--r:12px}
+body.calm *{animation:none!important;transition:none!important}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg)}
+body{color:var(--tx);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;min-height:100vh;
+background:radial-gradient(1000px 500px at 85% -10%,rgba(44,196,255,.13),transparent 60%),radial-gradient(800px 500px at -10% 30%,rgba(10,132,255,.1),transparent 60%),var(--bg);background-attachment:fixed}
+#bgc{position:fixed;inset:0;z-index:-1;width:100%;height:100%;pointer-events:none}
+button{font:inherit;font-weight:600;color:inherit;background:none;border:0;cursor:pointer;transition:.15s}
+button:active{transform:scale(.97)}
+input,select,textarea{font:inherit;font-size:16px;width:100%;color:var(--tx);background:#071022;border:1px solid var(--line);border-radius:12px;padding:11px 13px;outline:0;margin-bottom:9px}
+textarea{resize:vertical;min-height:70px}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(44,196,255,.13)}
+input[type=checkbox]{width:20px;height:20px;margin:0;accent-color:var(--blue)}
+/* boot */
+#boot{position:fixed;inset:0;z-index:9999;background:#03060C;display:grid;place-content:center;justify-items:center;gap:16px;transition:opacity .6s,visibility .6s}
+#boot.off{opacity:0;visibility:hidden}
+.bl{font-size:2.1rem;font-weight:900;letter-spacing:.4em;padding-left:.4em;background:linear-gradient(90deg,#fff,var(--blue));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.bb{width:210px;height:3px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}.bb i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue2),var(--blue));animation:ld 1.6s forwards}
+@keyframes ld{to{width:100%}}@keyframes pl{50%{opacity:.5}}
+.bt{font:.68rem ui-monospace,Menlo,monospace;color:var(--ti);letter-spacing:.14em}
+/* layout */
+#app{display:grid;grid-template-columns:1fr;min-height:100vh}
+aside{display:none}
+.top{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;background:rgba(4,7,14,.72);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--line)}
+.brand{font-weight:900;letter-spacing:.2em;font-size:.95rem;background:linear-gradient(90deg,#fff,var(--blue));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sp{flex:1}.brand{white-space:nowrap}
+@media(max-width:480px){#stx{display:none}.stage{font-size:.52rem;padding:3px 6px}.top{gap:8px}}
+.ib{position:relative;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line);display:grid;place-content:center;font-size:1.05rem}
+.bdg{position:absolute;top:-5px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:var(--blue);color:#021;font-size:.65rem;font-weight:800;display:grid;place-content:center;padding:0 5px}
+.st{display:flex;align-items:center;gap:6px;font-size:.66rem;color:var(--ti)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--mu)}.dot.on{background:var(--ok);box-shadow:0 0 10px var(--ok);animation:pl 1.8s infinite}.dot.off{background:var(--bad)}
+.stage{font-size:.58rem;font-weight:800;letter-spacing:.08em;padding:3px 8px;border-radius:99px;color:var(--blue);border:1px solid rgba(44,196,255,.4);text-transform:uppercase;white-space:nowrap}
+main{padding:16px 14px calc(env(safe-area-inset-bottom) + 96px);max-width:1100px;width:100%;margin:0 auto}
+.view{animation:in .3s ease}@keyframes in{from{opacity:0;transform:translateY(8px)}}
+h2{font-size:1.35rem;font-weight:800;letter-spacing:.01em}
+.sub{color:var(--ti);font-size:.82rem;margin:2px 0 14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:var(--pad);margin-bottom:12px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.card:before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--blue),transparent);opacity:.45}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:.72rem;color:var(--ti);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:12px}
+.m{background:rgba(20,34,58,.55);border:1px solid var(--line);border-radius:14px;padding:12px}
+.m small{font-size:.6rem;color:var(--ti);letter-spacing:.08em;text-transform:uppercase}
+.m b{display:block;font-size:1.55rem;margin-top:2px;background:linear-gradient(90deg,#fff,var(--blue));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.tag{display:inline-block;font-size:.58rem;font-weight:800;letter-spacing:.05em;padding:2px 7px;border-radius:5px;text-transform:uppercase;white-space:nowrap}
+.t-fact{background:rgba(52,211,153,.14);color:var(--ok)}.t-assumption{background:rgba(169,182,201,.16);color:var(--ti)}
+.t-estimate{background:rgba(44,196,255,.15);color:var(--blue)}.t-recommendation{background:transparent;border:1px solid var(--blue);color:var(--tx)}
+.t-idea{background:rgba(255,255,255,.08);color:var(--tx)}.t-risk{background:rgba(248,113,113,.14);color:var(--bad)}.t-ai{background:rgba(10,132,255,.2);color:#8FD0FF}
+.row{padding:11px 12px;background:rgba(6,12,24,.6);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.rh{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;font-size:.9rem}
+.rd{font-size:.8rem;color:var(--ti);margin-top:3px;white-space:pre-wrap;word-wrap:break-word}
+.acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+.btn{padding:11px 16px;border-radius:12px;font-size:.84rem;color:#02111c;background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 6px 22px rgba(10,132,255,.28)}
+.btn:disabled{opacity:.5}
+.b2{padding:8px 12px;border-radius:10px;font-size:.76rem;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.ok{padding:7px 12px;border-radius:9px;font-size:.75rem;background:rgba(52,211,153,.14);border:1px solid var(--ok);color:var(--ok)}
+.no{padding:7px 12px;border-radius:9px;font-size:.75rem;background:rgba(248,113,113,.12);border:1px solid var(--bad);color:var(--bad)}
+.banner{border-left:3px solid var(--blue);background:rgba(44,196,255,.06);padding:10px 12px;border-radius:8px;font-size:.76rem;color:var(--ti);margin-bottom:12px}
+.empty{padding:22px;text-align:center;color:var(--mu);font-size:.85rem;border:1px dashed var(--line);border-radius:12px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;font-size:.72rem;padding:7px 13px;border-radius:20px;color:var(--blue);background:rgba(44,196,255,.07);border:1px solid rgba(44,196,255,.3)}
+.bars{display:flex;flex-direction:column;gap:9px}
+.bar{display:grid;grid-template-columns:96px 1fr 34px;align-items:center;gap:8px;font-size:.76rem;color:var(--ti)}
+.bar i{display:block;height:9px;border-radius:5px;background:linear-gradient(90deg,var(--blue2),var(--blue));transition:width .7s;min-width:2px}
+.bar div{background:rgba(255,255,255,.06);border-radius:5px;overflow:hidden}
+.ring{--p:0;width:92px;height:92px;border-radius:50%;background:conic-gradient(var(--blue) calc(var(--p)*1%),rgba(255,255,255,.08) 0);display:grid;place-content:center;position:relative;flex-shrink:0}
+.ring:after{content:"";position:absolute;inset:8px;border-radius:50%;background:#070e1c}.ring b{position:relative;z-index:1;font-size:1.15rem}
+.flex{display:flex;gap:12px;align-items:center}
+.tl{position:relative;padding-left:22px}.tl:before{content:"";position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:linear-gradient(var(--blue),transparent)}
+.ts{position:relative;margin-bottom:12px;font-size:.85rem}.ts:before{content:"";position:absolute;left:-21px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--bg);border:2px solid var(--mu)}
+.ts.now:before{background:var(--blue);border-color:var(--blue);box-shadow:0 0 12px var(--blue)}.ts small{display:block;color:var(--mu);font-size:.7rem}
+.kan{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.chk{display:flex;gap:10px;align-items:center;padding:9px 4px;border-bottom:1px solid rgba(255,255,255,.05);font-size:.85rem}
+.chk.d span{text-decoration:line-through;color:var(--mu)}
+/* chat */
+.chat{display:flex;flex-direction:column;height:calc(100vh - 470px);min-height:300px}
+.msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 0 10px}
+.b{max-width:90%;padding:11px 14px;border-radius:16px;font-size:.88rem;word-wrap:break-word;user-select:text;-webkit-user-select:text}
+.b.u{align-self:flex-end;background:linear-gradient(135deg,#0A84FF,#1D6FCC);border-bottom-right-radius:4px;white-space:pre-wrap}
+.b.a{align-self:flex-start;background:rgba(12,22,40,.95);border:1px solid var(--line);border-bottom-left-radius:4px}
+.md p{margin:3px 0}.md ul{margin:5px 0 5px 18px}.md h4{margin:8px 0 3px;color:var(--blue);font-size:.85rem}
+.ty span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--blue);animation:bn 1s infinite}.ty span:nth-child(2){animation-delay:.15s}.ty span:nth-child(3){animation-delay:.3s}
+@keyframes bn{50%{transform:translateY(-5px);opacity:.4}}
+.cb{display:flex;gap:8px;align-items:center}.cb input{margin:0}
+.send{flex-shrink:0;height:44px;padding:0 16px;border-radius:12px;color:#02111c;background:linear-gradient(135deg,var(--blue),var(--blue2))}
+.mic{flex-shrink:0;width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line)}.mic.rec{background:rgba(248,113,113,.25);border-color:var(--bad)}
+/* nav */
+nav.bot{position:fixed;left:0;right:0;bottom:0;z-index:60;display:flex;padding:8px 6px calc(env(safe-area-inset-bottom) + 6px);background:rgba(4,7,14,.86);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--line)}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.6rem;color:var(--ti)}.nb i{font-style:normal;font-size:1.2rem;opacity:.7}.nb.act{color:var(--blue)}.nb.act i{opacity:1;text-shadow:0 0 12px var(--blue)}
+/* overlays */
+.ov{position:fixed;inset:0;z-index:200;background:rgba(2,5,10,.74);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:640px;max-height:88vh;overflow-y:auto;background:#0A1424;border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom) + 18px);animation:up .25s}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+.pal{align-items:flex-start;padding-top:12vh}.pal .sheet{border-radius:18px;max-height:70vh}
+.mi{display:flex;align-items:center;gap:10px;padding:11px 10px;border-radius:10px;width:100%;text-align:left;font-weight:500}.mi:hover,.mi.sel{background:rgba(44,196,255,.1)}.mi small{color:var(--mu);margin-left:auto}
+.gl{font-size:.62rem;color:var(--mu);letter-spacing:.14em;text-transform:uppercase;margin:12px 4px 4px}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:6px;align-items:center}
+.tt{background:#0E1D34;border:1px solid var(--blue);padding:9px 16px;border-radius:12px;font-size:.8rem;animation:in .25s}
+@media(min-width:900px){
+#app{grid-template-columns:250px 1fr}
+aside{display:block;position:sticky;top:0;height:100vh;overflow-y:auto;padding:20px 12px;border-right:1px solid var(--line);background:rgba(4,7,14,.55)}
+aside .brand{display:block;padding:0 8px 14px;font-size:1.05rem}
+nav.bot{display:none}main{padding-bottom:40px}.sheet{border-radius:22px;margin-bottom:6vh}.ov{align-items:center}.pal{align-items:flex-start}
+.chat{height:calc(100vh - 330px);min-height:360px}}
+</style>
+</head>
+<body>
+<canvas id="bgc"></canvas>
+<div id="boot"><div class="bl">CRIST AI</div><div class="bb"><i></i></div><div class="bt" id="btx">INITIALISING COMMAND CENTRE…</div></div>
+<div id="app">
+  <aside id="side"></aside>
+  <div>
+    <div class="top">
+      <div class="brand">CRIST AI</div><span class="stage">Phase 0 · Concept</span>
+      <div class="sp"></div>
+      <div class="st"><span class="dot" id="dot"></span><span id="stx">…</span></div>
+      <button class="ib" id="bSearch" aria-label="Search">🔍</button>
+      <button class="ib" id="bBell" aria-label="Notifications">🔔<span class="bdg" id="bdg" style="display:none">0</span></button>
+    </div>
+    <main id="main"></main>
+  </div>
+</div>
+<nav class="bot" id="bot"></nav>
+<div id="toast"></div>
+
+<script>
+"use strict";
+/* ============ CONFIG ============ */
+const DEFAULT_API="https://crist-ai-v2.svlikith56.workers.dev";
+const KEY="crist_cc_v3", MAXMSG=1900;
+
+/* ============ HELPERS ============ */
+const $=(s,r=document)=>r.querySelector(s);
+function h(t,a,...c){const e=document.createElement(t);
+ if(a)for(const k in a){const v=a[k];if(v==null||v===false)continue;
+  if(k==="class")e.className=v;else if(k==="value")e.value=v;else if(k==="checked")e.checked=!!v;
+  else if(k.startsWith("on"))e[k]=v;else e.setAttribute(k,v===true?"":v)}
+ c.flat(9).forEach(x=>{if(x==null||x===false)return;e.append(x.nodeType?x:document.createTextNode(String(x)))});return e}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const today=()=>new Date().toISOString().slice(0,10);
+const fmt=n=>Number(n||0).toLocaleString("en-IN");
+function toast(m){const t=h("div",{class:"tt"},m);$("#toast").append(t);setTimeout(()=>t.remove(),2600)}
+function tagEl(t){return h("span",{class:"tag t-"+String(t).toLowerCase().replace(/\s+/g,"")},t)}
+
+/* ============ STATE ============ */
+const DEF=()=>({user:"Founder",api:DEFAULT_API,compact:false,calm:false,
+ tasks:[{id:uid(),title:"Define CRIST GT-01 target customer",pri:"High",due:"",done:false,tag:"Recommendation"},
+        {id:uid(),title:"Write GT-01 requirements document",pri:"High",due:"",done:false,tag:"Recommendation"},
+        {id:uid(),title:"List 10 possible technical advisors",pri:"Medium",due:"",done:false,tag:"Idea"}],
+ projects:[{id:uid(),title:"CRIST brand identity",st:"Active",pct:20},{id:uid(),title:"GT-01 concept brief",st:"Planned",pct:0},{id:uid(),title:"Founder website",st:"Active",pct:60}],
+ approvals:[],decisions:[],records:{},logs:[{t:Date.now(),m:"Command centre initialised in Concept-Only mode."}],
+ chats:{},swot:{s:"",w:"",o:"",t:""},
+ gt:{fields:{},checks:{}},inv:{checks:{}},
+ fin:{cash:0,burn:0,lines:[]},
+ facts:[{id:uid(),k:"Company stage",v:"Early-stage concept. No prototype, factory or confirmed funding.",tag:"Fact"},
+        {id:uid(),k:"Flagship concept",v:"CRIST GT-01, a futuristic luxury grand tourer. Specifications not validated.",tag:"Fact"},
+        {id:uid(),k:"CRIST Chip",v:"Proposed vehicle-control and safety concept. Needs research, engineering and validation.",tag:"Assumption"}]});
+let S=DEF();
+function load(){try{const s=localStorage.getItem(KEY);if(s)S=Object.assign(DEF(),JSON.parse(s))}catch(e){}}
+let saveT;function save(){clearTimeout(saveT);saveT=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Storage full or blocked. Export a backup.")}},120);bell()}
+function log(m){S.logs.unshift({t:Date.now(),m});S.logs=S.logs.slice(0,150);save()}
+const recs=id=>(S.records[id]=S.records[id]||[]);
+
+/* ============ AI ============ */
+const ROLES={
+ cofounder:["AI Co-Founder","You are CRIST AI, the founder's honest AI business co-founder for CRIST Motors (concept stage luxury automotive startup). Be strategic, practical, challenge weak ideas."],
+ strategy:["Chief Strategy Officer","Act as Chief Strategy Officer. Give structured strategy with risks and alternatives."],
+ chief:["Chief of Staff","Act as an executive Chief of Staff. Prioritise, plan the week, be concise."],
+ cto:["Chief Technology Officer","Act as an automotive CTO. Be technically honest; flag what needs validation."],
+ analyst:["BI Analyst","Act as a business intelligence analyst. Be quantitative and state assumptions."],
+ research:["Research Director","Act as a research director. Suggest research questions, methods and credible source types."],
+ pm:["Project Manager","Act as a project manager. Give milestones, owners, dependencies."],
+ finance:["Finance Advisor","Act as a startup finance advisor. State all numbers as estimates and list assumptions."],
+ investor:["Investor Relations","Act as an investor relations advisor. Be honest, never overclaim."],
+ product:["Product Strategist","Act as an innovation and product strategist for vehicles and mobility."],
+ brand:["Brand Strategist","Act as a luxury brand and marketing strategist."],
+ ops:["Operations Advisor","Act as an operations and decision advisor. Compare options and recommend."]};
+const RULES=" Rules: CRIST Motors is concept-stage. Never invent facts, funding, partners, revenue, team or technical achievements. Separate Fact / Assumption / Idea / Recommendation. Ask for missing info.";
+function snap(){const o=S.tasks.filter(t=>!t.done);return `Data: ${o.length} open tasks (${o.slice(0,4).map(t=>t.title).join("; ")}); ${S.projects.length} projects; ${S.approvals.filter(a=>a.st==="Pending").length} pending approvals.`}
+async function callAI(text,role="cofounder",withData=false){
+ const r=ROLES[role]||ROLES.cofounder;
+ let msg=`[${r[1]}${RULES}]\n${withData?snap()+"\n":""}${text}`;
+ if(msg.length>MAXMSG)msg=msg.slice(0,MAXMSG);
+ const ac=new AbortController(),to=setTimeout(()=>ac.abort(),50000);
+ try{const res=await fetch(S.api,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({message:msg}),signal:ac.signal});
+  const d=await res.json();if(!res.ok||d.error)throw new Error(d.error||("HTTP "+res.status));
+  log("AI reply received ("+r[0]+")");return d.reply||"No reply generated."}
+ catch(e){throw new Error(e.name==="AbortError"?"The AI took too long. Try a shorter question.":(e.message||"Connection error"))}
+ finally{clearTimeout(to)}}
+
+function md(box,text){box.textContent="";box.classList.add("md");let ul=null;
+ const inl=(p,s)=>s.split(/\*\*(.+?)\*\*/g).forEach((x,i)=>{if(!x)return;p.append(i%2?h("strong",0,x):document.createTextNode(x.replace(/\*(?=\S)/g,"")))});
+ text.split("\n").forEach(l=>{const m=l.match(/^\s*(?:[*\-•]|\d+\.)\s+(.*)/);
+  if(m){if(!ul){ul=h("ul");box.append(ul)}const li=h("li");inl(li,m[1]);ul.append(li)}
+  else{ul=null;if(!l.trim())return;const hd=l.match(/^#+\s*(.*)/);if(hd)box.append(h("h4",0,hd[1]));else{const p=h("p");inl(p,l);box.append(p)}}})}
+
+/* AI sheet: runs a prompt, shows result, offers save */
+function sheet(content,cls){const ov=h("div",{class:"ov "+(cls||""),onclick:e=>{if(e.target===ov)ov.remove()}},h("div",{class:"sheet"},content));document.body.append(ov);return ov}
+function aiSheet(title,prompt,role,saveTo){
+ const out=h("div",{class:"b a"},h("div",{class:"ty"},h("span"),h("span"),h("span")));
+ let txt="";const ov=sheet([h("div",{class:"ch"},title,h("button",{class:"b2",onclick:()=>ov.remove()},"Close")),out,
+  h("div",{class:"acts",id:"sa"})]);
+ callAI(prompt,role,true).then(r=>{txt=r;md(out,r);
+  const a=$("#sa",ov);
+  if(saveTo)a.append(h("button",{class:"b2",onclick:()=>{recs(saveTo).unshift({id:uid(),title:title,body:txt,tag:"Recommendation",ai:true,ts:Date.now()});log("Saved AI output to "+saveTo);save();toast("Saved to notes ✓")}},"Save to notes"));
+  a.append(h("button",{class:"b2",onclick:()=>copy(txt)},"Copy"));
+  a.append(h("p",{class:"rd",style:"width:100%"},"AI-generated. Verify before relying on it."))})
+ .catch(e=>{out.textContent="⚠️ "+e.message})}
+function copy(t){try{navigator.clipboard.writeText(t);toast("Copied ✓")}catch(e){toast("Select the text to copy")}}
+
+/* ============ MODULES ============ */
+const GROUPS=[["Command",["overview","ai","cofounder","strategy","chief"]],["Operations",["tasks","approvals","projects","decisions"]],
+ ["Programmes",["gt01","research","tech","aidev","chip","innovation"]],["Business",["bi","finance","investor","brand","expansion"]],
+ ["Knowledge",["knowledge","reports"]],["System",["settings"]]];
+const M={overview:["Executive Overview","🏠"],ai:["AI Intelligence Centre","🧠"],cofounder:["Business Co-Founder","🤝"],strategy:["Strategy Office","♟️"],chief:["Chief of Staff","📋"],
+ tasks:["Task Management","✅"],approvals:["Approval Centre","🛡️"],projects:["Project Management","📊"],decisions:["Decision Centre","⚖️"],
+ gt01:["CRIST GT-01 Programme","🏎️"],research:["Research Centre","🔬"],tech:["Technology Lab","⚙️"],aidev:["CRIST AI Development","🤖"],chip:["CRIST Chip Research","🔷"],innovation:["Product Innovation","💡"],
+ bi:["Business Intelligence","📈"],finance:["Finance Planning","💰"],investor:["Investor Relations","🏦"],brand:["Brand & Marketing","✨"],expansion:["Global Expansion","🌍"],
+ knowledge:["Knowledge Centre","📚"],reports:["Reports & Analytics","🧾"],settings:["Settings","⚙︎"]};
+const V={};let cur="overview";
+
+function head(id,sub){return [h("h2",0,M[id][0]),h("p",{class:"sub"},sub)]}
+
+/* ---- generic records module ---- */
+function recordsView(id,cfg){return()=>{
+ const wrap=h("div",{class:"view"},head(id,cfg.sub));
+ if(cfg.banner)wrap.append(h("div",{class:"banner"},cfg.banner));
+ if(cfg.prompts)wrap.append(h("div",{class:"chips"},cfg.prompts.map(p=>h("button",{class:"chip",onclick:()=>aiSheet(p[0],p[1],cfg.role,id)},"✦ "+p[0]))));
+ const t=h("input",{placeholder:cfg.ph||"Title"}),b=h("textarea",{placeholder:"Details, notes, evidence…"}),
+  tg=h("select",0,["Idea","Fact","Assumption","Estimate","Recommendation","Risk"].map(x=>h("option",0,x))),
+  u=cfg.url?h("input",{placeholder:"Source URL (optional)"}):null,q=h("input",{placeholder:"Search this module…"}),list=h("div");
+ const add=h("button",{class:"btn",onclick:()=>{if(!t.value.trim())return toast("Add a title");
+  recs(id).unshift({id:uid(),title:t.value.trim(),body:b.value.trim(),tag:tg.value,url:u?u.value.trim():"",ts:Date.now()});
+  log("Added to "+M[id][0]+": "+t.value.trim());t.value=b.value="";if(u)u.value="";save();draw()}},"Add");
+ wrap.append(h("div",{class:"card"},h("div",{class:"ch"},"Add entry"),t,b,h("div",{class:"flex"},tg,u||""),add));
+ wrap.append(q,list);
+ function draw(){list.textContent="";const f=q.value.toLowerCase(),a=recs(id).filter(r=>(r.title+r.body).toLowerCase().includes(f));
+  if(!a.length){list.append(h("div",{class:"empty"},recs(id).length?"No matches.":"Nothing here yet. Add your first entry or tap a ✦ AI suggestion above."));return}
+  a.forEach(r=>list.append(h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,r.title),h("span",0,r.ai?h("span",{class:"tag t-ai"},"AI draft"):"",tagEl(r.tag))),
+   r.body?h("div",{class:"rd"},r.body):"",r.url?h("div",{class:"rd"},"🔗 "+r.url):"",
+   h("div",{class:"acts"},h("button",{class:"b2",onclick:()=>aiSheet("Review: "+r.title,"Critically review this note and suggest next steps. Title: "+r.title+". Details: "+r.body.slice(0,900),cfg.role,id)},"✦ Ask AI"),
+    h("button",{class:"no",onclick:()=>{S.records[id]=recs(id).filter(x=>x.id!==r.id);save();draw()}},"Delete")))))}
+ q.oninput=draw;draw();return wrap}}
+
+/* ---- Overview ---- */
+V.overview=()=>{
+ const open=S.tasks.filter(t=>!t.done),pend=S.approvals.filter(a=>a.st==="Pending");
+ const gp=pct(GTCHK,S.gt.checks),ip=pct(INVCHK,S.inv.checks),tp=S.tasks.length?Math.round(100*S.tasks.filter(t=>t.done).length/S.tasks.length):0;
+ const w=h("div",{class:"view"},h("h2",0,"Welcome, "+S.user),h("p",{class:"sub"},"CRIST Motors · Concept stage · "+new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})));
+ w.append(h("div",{class:"g3"},mm("Open tasks",open.length),mm("Pending approvals",pend.length),mm("Active projects",S.projects.filter(p=>p.st==="Active").length),mm("Decisions logged",S.decisions.length)));
+ w.append(h("div",{class:"banner"},h("strong",0,"Accuracy guardrail: "),"CRIST Motors is concept-stage. Scores below are your own self-assessed checklists, not validation."));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Readiness (self-assessed)"),h("div",{class:"flex",style:"justify-content:space-around;flex-wrap:wrap"},ring("GT-01",gp),ring("Investor",ip),ring("Tasks done",tp))));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Today's focus",h("button",{class:"b2",onclick:()=>aiSheet("Daily briefing","Create my daily briefing: top 3 priorities, one risk, one quick win.","chief","")},"✦ AI briefing")),
+  open.length?open.sort(pr).slice(0,4).map(t=>h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,t.title),h("span",{class:"tag t-"+(t.pri==="High"?"risk":"estimate")},t.pri)))):h("div",{class:"empty"},"No open tasks. Add one in Task Management.")));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Roadmap"),h("div",{class:"tl"},[["Vision & brand","NOW"],["Market validation",""],["Research & advisors",""],["Team",""],["Specifications",""],["CAD & simulation",""],["Prototype","Only after validation and funding"]].map((s,i)=>h("div",{class:"ts"+(i?"":" now")},h("strong",0,s[0]),s[1]?h("small",0,s[1]):"")))));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Recent activity"),S.logs.slice(0,5).map(l=>h("div",{class:"rd"},"• "+new Date(l.t).toLocaleString()+" — "+l.m))));
+ return w};
+const mm=(k,v)=>h("div",{class:"m"},h("small",0,k),h("b",0,v));
+const ring=(k,p)=>h("div",{style:"text-align:center"},h("div",{class:"ring",style:"--p:"+p},h("b",0,p+"%")),h("small",{class:"rd"},k));
+const pr=(a,b)=>({High:0,Medium:1,Low:2}[a.pri]-{High:0,Medium:1,Low:2}[b.pri]);
+const pct=(list,c)=>Math.round(100*list.filter(x=>c[x]).length/list.length);
+
+/* ---- Chat (AI centre + cofounder) ---- */
+function chatView(id,roles,def,chips){return()=>{
+ const w=h("div",{class:"view"},head(id,id==="ai"?"Pick a specialist role. Every reply separates fact, assumption and recommendation.":"Your honest AI business partner. It will challenge weak ideas."));
+ let role=def,inc=false;const rs=h("select",{onchange:e=>role=e.target.value},roles.map(r=>h("option",{value:r,selected:r===def},ROLES[r][0])));
+ const dc=h("label",{class:"rd",style:"display:flex;gap:8px;align-items:center;margin-bottom:8px"},h("input",{type:"checkbox",onchange:e=>inc=e.target.checked}),"Include my task/project summary");
+ const msgs=h("div",{class:"msgs"}),inp=h("input",{placeholder:"Ask CRIST AI…",onkeydown:e=>{if(e.key==="Enter")send()}}),sb=h("button",{class:"send",onclick:()=>send()},"Send"),mic=h("button",{class:"mic",onclick:()=>voice(inp,mic)},"🎤");
+ const hist=S.chats[id]=S.chats[id]||[];
+ function addB(t,who,saveable){const b=h("div",{class:"b "+who});if(who==="u")b.textContent=t;else md(b,t);
+  if(who==="a"&&saveable)b.append(h("div",{class:"acts"},h("button",{class:"b2",onclick:()=>copy(t)},"Copy"),h("button",{class:"b2",onclick:()=>{S.tasks.unshift({id:uid(),title:t.replace(/[*#]/g,"").split("\n").find(x=>x.trim()).slice(0,90),pri:"Medium",due:"",done:false,tag:"Idea"});save();toast("Task created from reply")}},"→ Task"),h("button",{class:"b2",onclick:()=>{recs("research").unshift({id:uid(),title:"AI note "+new Date().toLocaleDateString(),body:t,tag:"Idea",ai:true,ts:Date.now()});save();toast("Saved to Research")}},"→ Notes")));
+  msgs.append(b);msgs.scrollTop=1e9;return b}
+ if(!hist.length)addB("**CRIST AI online.** I treat CRIST Motors as an early-stage concept and will not invent funding, prototypes or technology. What do you want to work on?","a");
+ hist.forEach(x=>addB(x.t,x.w,x.w==="a"));
+ async function send(txt){const m=(txt||inp.value).trim();if(!m)return;inp.value="";addB(m,"u");hist.push({w:"u",t:m});
+  const b=h("div",{class:"b a"},h("div",{class:"ty"},h("span"),h("span"),h("span")));msgs.append(b);msgs.scrollTop=1e9;sb.disabled=true;
+  try{const r=await callAI(m.slice(0,1500),role,inc);md(b,r);hist.push({w:"a",t:r});S.chats[id]=hist.slice(-40)}
+  catch(e){b.textContent="⚠️ "+e.message}sb.disabled=false;save();msgs.scrollTop=1e9}
+ w.append(h("div",{class:"chips"},chips.map(c=>h("button",{class:"chip",onclick:()=>send(c[1])},c[0]))),rs,dc,h("div",{class:"card chat"},msgs,h("div",{class:"cb"},mic,inp,sb)),
+  h("button",{class:"b2",onclick:()=>{S.chats[id]=[];save();go(id)}},"Clear chat"));return w}}
+let rec=null;
+function voice(inp,mic){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return toast("Voice not supported here. Use the keyboard mic.");
+ if(rec){rec.stop();return}rec=new SR();rec.lang="en-IN";mic.classList.add("rec");rec.onresult=e=>inp.value=e.results[0][0].transcript;
+ rec.onend=rec.onerror=()=>{mic.classList.remove("rec");rec=null};rec.start()}
+
+/* ---- Strategy ---- */
+V.strategy=()=>{const w=h("div",{class:"view"},head("strategy","SWOT, strategic options and honest challenge."));
+ w.append(h("div",{class:"g2"},[["s","Strengths"],["w","Weaknesses"],["o","Opportunities"],["t","Threats"]].map(([k,l])=>
+  h("div",{class:"card"},h("div",{class:"ch"},l),h("textarea",{placeholder:"One point per line",value:S.swot[k],oninput:e=>{S.swot[k]=e.target.value;save()}})))));
+ w.append(h("button",{class:"btn",onclick:()=>aiSheet("SWOT analysis","Analyse my SWOT honestly, challenge weak points and give 3 strategic priorities. S:"+S.swot.s.slice(0,350)+" W:"+S.swot.w.slice(0,350)+" O:"+S.swot.o.slice(0,350)+" T:"+S.swot.t.slice(0,350),"strategy","strategy")},"✦ Analyse my SWOT with AI"));
+ w.append(h("div",{style:"height:14px"}));
+ return w};
+
+/* ---- Chief of staff ---- */
+V.chief=()=>{const w=h("div",{class:"view"},head("chief","Your daily and weekly operating rhythm."));
+ const od=S.tasks.filter(t=>!t.done&&t.due&&t.due<today()),dt=S.tasks.filter(t=>!t.done&&t.due===today());
+ w.append(h("div",{class:"g3"},mm("Overdue",od.length),mm("Due today",dt.length),mm("Pending approvals",S.approvals.filter(a=>a.st==="Pending").length)));
+ w.append(h("div",{class:"chips"},[["Daily briefing","Create my daily briefing: top 3 priorities, one risk, one quick win."],["Weekly review","Run a weekly review: what to finish, drop, delegate, and 3 goals for next week."],["Prioritise tasks","Prioritise my open tasks using impact vs effort and explain."],["Meeting agenda","Draft an agenda for a 30 minute founder planning meeting."]].map(p=>h("button",{class:"chip",onclick:()=>aiSheet(p[0],p[1],"chief","")},"✦ "+p[0]))));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Focus list"),S.tasks.filter(t=>!t.done).sort(pr).slice(0,8).map(t=>h("div",{class:"chk"},h("input",{type:"checkbox",onchange:()=>{t.done=true;log("Completed: "+t.title);save();go("chief")}}),h("span",0,t.title)))));
+ return w};
+
+/* ---- Tasks ---- */
+V.tasks=()=>{const w=h("div",{class:"view"},head("tasks","Create, prioritise and complete work."));
+ const t=h("input",{placeholder:"New task"}),p=h("select",0,["High","Medium","Low"].map(x=>h("option",0,x))),d=h("input",{type:"date"}),f=h("select",{onchange:draw},["Open","All","Done","Overdue"].map(x=>h("option",0,x))),list=h("div");
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"New task"),t,h("div",{class:"flex"},p,d),h("button",{class:"btn",onclick:()=>{if(!t.value.trim())return toast("Add a title");S.tasks.unshift({id:uid(),title:t.value.trim(),pri:p.value,due:d.value,done:false,tag:"Idea"});log("Task added: "+t.value.trim());t.value="";save();draw()}},"Add task")),f,list);
+ w.append(h("button",{class:"b2",onclick:()=>aiSheet("Suggest tasks","Suggest 6 concrete next tasks for CRIST Motors at concept stage, one per line.","chief","")},"✦ AI task ideas"));
+ function draw(){list.textContent="";let a=S.tasks.slice().sort(pr);const v=f.value;
+  a=a.filter(x=>v==="All"||(v==="Open"&&!x.done)||(v==="Done"&&x.done)||(v==="Overdue"&&!x.done&&x.due&&x.due<today()));
+  if(!a.length)return list.append(h("div",{class:"empty"},"No tasks here."));
+  a.forEach(x=>list.append(h("div",{class:"row"},h("div",{class:"rh"},h("label",{class:"chk d"+(x.done?" d":""),style:"border:0;padding:0"},h("input",{type:"checkbox",checked:x.done,onchange:e=>{x.done=e.target.checked;log((x.done?"Completed: ":"Reopened: ")+x.title);save();draw()}}),h("span",0,x.title)),
+   h("span",{class:"tag t-"+(x.pri==="High"?"risk":x.pri==="Low"?"fact":"estimate")},x.pri)),
+   h("div",{class:"rd"},(x.due?"Due "+x.due+(!x.done&&x.due<today()?" · OVERDUE":""):"No due date")),
+   h("div",{class:"acts"},h("button",{class:"no",onclick:()=>{S.tasks=S.tasks.filter(y=>y.id!==x.id);save();draw()}},"Delete")))))}
+ draw();return w};
+
+/* ---- Approvals ---- */
+V.approvals=()=>{const w=h("div",{class:"view"},head("approvals","The AI prepares. You decide. Nothing external is ever executed from here."));
+ w.append(h("div",{class:"banner"},h("strong",0,"Honest by design: "),"Approving records your decision locally. It does NOT send emails or contact anyone. You carry out approved actions yourself."));
+ const t=h("input",{placeholder:"Action needing approval"}),c=h("textarea",{placeholder:"Consequence / who is affected"}),pend=h("div"),hist=h("div");
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"New request"),t,c,h("button",{class:"btn",onclick:()=>{if(!t.value.trim())return toast("Describe the action");S.approvals.unshift({id:uid(),title:t.value.trim(),cons:c.value.trim(),st:"Pending",ts:Date.now()});log("Approval requested: "+t.value.trim());t.value=c.value="";save();draw()}},"Request approval")),
+  h("div",{class:"card"},h("div",{class:"ch"},"Pending"),pend),h("div",{class:"card"},h("div",{class:"ch"},"History"),hist));
+ function draw(){pend.textContent=hist.textContent="";const p=S.approvals.filter(a=>a.st==="Pending"),o=S.approvals.filter(a=>a.st!=="Pending");
+  if(!p.length)pend.append(h("div",{class:"empty"},"Nothing waiting."));
+  p.forEach(a=>pend.append(h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,a.title)),h("div",{class:"rd"},"Consequence: "+(a.cons||"not stated")),
+   h("div",{class:"acts"},h("button",{class:"ok",onclick:()=>r(a,"Approved")},"Approve"),h("button",{class:"no",onclick:()=>r(a,"Rejected")},"Reject")))));
+  if(!o.length)hist.append(h("div",{class:"empty"},"No decisions yet."));
+  o.forEach(a=>hist.append(h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,a.title),h("span",{class:"tag t-"+(a.st==="Approved"?"fact":"risk")},a.st)),h("div",{class:"rd"},"Recorded locally · "+new Date(a.dt||a.ts).toLocaleString()))))}
+ function r(a,v){a.st=v;a.dt=Date.now();log(v+": "+a.title+" (recorded only)");save();draw()}
+ draw();return w};
+
+/* ---- Projects ---- */
+V.projects=()=>{const w=h("div",{class:"view"},head("projects","Kanban board with progress."));const t=h("input",{placeholder:"New project"}),board=h("div",{class:"kan"});
+ w.append(h("div",{class:"card"},t,h("button",{class:"btn",onclick:()=>{if(!t.value.trim())return;S.projects.push({id:uid(),title:t.value.trim(),st:"Planned",pct:0});log("Project added: "+t.value.trim());t.value="";save();draw()}},"Add project")),board);
+ const st=["Planned","Active","Done"];
+ function draw(){board.textContent="";st.forEach((s,i)=>{const col=h("div",{class:"card"},h("div",{class:"ch"},s+" · "+S.projects.filter(p=>p.st===s).length));
+  S.projects.filter(p=>p.st===s).forEach(p=>col.append(h("div",{class:"row"},h("strong",0,p.title),h("div",{class:"bar",style:"grid-template-columns:1fr 34px;margin-top:6px"},h("div",0,h("i",{style:"width:"+p.pct+"%"})),h("span",0,p.pct+"%")),
+   h("input",{type:"range",min:0,max:100,step:5,value:p.pct,style:"padding:0;margin:6px 0",oninput:e=>{p.pct=+e.target.value;save()},onchange:draw}),
+   h("div",{class:"acts"},i>0?h("button",{class:"b2",onclick:()=>{p.st=st[i-1];save();draw()}},"←"):"",i<2?h("button",{class:"b2",onclick:()=>{p.st=st[i+1];if(p.st==="Done")p.pct=100;log("Project → "+p.st+": "+p.title);save();draw()}},"→"):"",h("button",{class:"no",onclick:()=>{S.projects=S.projects.filter(x=>x.id!==p.id);save();draw()}},"✕")))));
+  board.append(col)})}
+ draw();return w};
+
+/* ---- Decisions ---- */
+V.decisions=()=>{const w=h("div",{class:"view"},head("decisions","Record why you decided. Review later."));
+ const t=h("input",{placeholder:"Decision (e.g. Build vs partner for powertrain)"}),o=h("textarea",{placeholder:"Options considered"}),c=h("input",{placeholder:"Chosen option"}),r=h("textarea",{placeholder:"Rationale and assumptions"}),rv=h("input",{type:"date"}),list=h("div");
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Log a decision"),t,o,c,r,h("label",{class:"rd"},"Review date"),rv,h("button",{class:"btn",onclick:()=>{if(!t.value.trim())return toast("Add the decision");S.decisions.unshift({id:uid(),t:t.value.trim(),o:o.value,c:c.value,r:r.value,rv:rv.value,ts:Date.now()});log("Decision logged: "+t.value.trim());t.value=o.value=c.value=r.value="";save();draw()}},"Save decision")),list);
+ function draw(){list.textContent="";if(!S.decisions.length)return list.append(h("div",{class:"empty"},"No decisions logged yet."));
+  S.decisions.forEach(d=>list.append(h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,d.t),d.rv?h("span",{class:"tag t-estimate"},"Review "+d.rv):""),h("div",{class:"rd"},"Options: "+(d.o||"—")+"\nChosen: "+(d.c||"—")+"\nWhy: "+(d.r||"—")),
+   h("div",{class:"acts"},h("button",{class:"b2",onclick:()=>aiSheet("Challenge decision","Challenge this decision, list blind spots and alternatives. Decision: "+d.t+". Options: "+d.o.slice(0,400)+". Chosen: "+d.c+". Why: "+d.r.slice(0,400),"ops","")},"✦ Challenge"),h("button",{class:"no",onclick:()=>{S.decisions=S.decisions.filter(x=>x.id!==d.id);save();draw()}},"Delete")))))}
+ draw();return w};
+
+/* ---- Checklists ---- */
+const GTCHK=["Define target customer","Write requirements document","Design brief","Concept sketches","Engage technical advisor","Feasibility study","Cost model","Regulatory scan","Build vs partner decision","Funding plan"];
+const INVCHK=["One-page honest brief","Problem and solution statement","Market sizing with sources","Budget and use of funds","Team and advisor plan","Risk register","NDA template","Target investor list","Pitch deck draft","Legal entity plan"];
+const checks=(list,c)=>list.map(x=>h("label",{class:"chk"+(c[x]?" d":"")},h("input",{type:"checkbox",checked:c[x],onchange:e=>{c[x]=e.target.checked;save();go(cur)}}),h("span",0,x)));
+
+/* ---- GT-01 ---- */
+const GTF=[["Segment","Luxury grand tourer","Fact"],["Design direction","Aggressive, premium, futuristic","Fact"],["Powertrain","Not decided","Assumption"],["Performance targets","Not defined","Assumption"],["Range / battery","Not defined","Assumption"],["Weight","Not defined","Estimate"],["Target price","Not defined","Estimate"],["Target markets","Not decided","Assumption"],["Prototype status","No prototype exists","Fact"]];
+V.gt01=()=>{const w=h("div",{class:"view"},head("gt01","Flagship concept. Specifications are NOT validated."));
+ w.append(h("div",{class:"banner"},"Everything below is a founder-entered concept. Nothing is a finished or tested specification."));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Concept sheet"),GTF.map(([k,d,tg])=>{const f=S.gt.fields[k]=S.gt.fields[k]||{v:d,tag:tg};
+  return h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,k),h("select",{style:"width:auto;margin:0;padding:4px 8px;font-size:.75rem",onchange:e=>{f.tag=e.target.value;save()}},["Fact","Assumption","Estimate","Idea"].map(x=>h("option",{selected:x===f.tag},x)))),
+   h("input",{value:f.v,style:"margin:6px 0 0",oninput:e=>{f.v=e.target.value;save()}}))})));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Validation checklist",h("span",0,pct(GTCHK,S.gt.checks)+"%")),checks(GTCHK,S.gt.checks)));
+ w.append(h("div",{class:"chips"},[["Design brief","Draft a design brief for a luxury grand tourer concept. Mark everything as concept."],["Risks","List the top 8 risks of developing GT-01 and how to test each cheaply."],["Spec questions","List the key specification questions I must answer before engineering starts."]].map(p=>h("button",{class:"chip",onclick:()=>aiSheet(p[0],p[1],"cto","tech")},"✦ "+p[0]))));return w};
+
+/* ---- BI ---- */
+function bars(data){const mx=Math.max(1,...data.map(d=>d[1]));return h("div",{class:"bars"},data.map(d=>h("div",{class:"bar"},h("span",0,d[0]),h("div",0,h("i",{style:"width:"+(d[1]/mx*100)+"%"})),h("b",0,d[1]))))}
+V.bi=()=>{const w=h("div",{class:"view"},head("bi","Live analytics from your own data."));const T=S.tasks,days={};
+ for(let i=6;i>=0;i--){const d=new Date(Date.now()-i*864e5).toISOString().slice(5,10);days[d]=0}S.logs.forEach(l=>{const d=new Date(l.t).toISOString().slice(5,10);if(d in days)days[d]++});
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Tasks by priority"),bars(["High","Medium","Low"].map(p=>[p,T.filter(t=>t.pri===p&&!t.done).length]))),
+  h("div",{class:"card"},h("div",{class:"ch"},"Projects by status"),bars(["Planned","Active","Done"].map(s=>[s,S.projects.filter(p=>p.st===s).length]))),
+  h("div",{class:"card"},h("div",{class:"ch"},"Activity (7 days)"),bars(Object.entries(days))),
+  h("div",{class:"card"},h("div",{class:"ch"},"Entries per department"),bars(Object.keys(M).filter(k=>S.records[k]&&S.records[k].length).map(k=>[M[k][0].split(" ")[0],S.records[k].length]))),
+  h("button",{class:"btn",onclick:()=>aiSheet("Business insights","Based on my data summary give 3 insights and 2 warnings.","analyst","")},"✦ AI insights"));return w};
+
+/* ---- Finance ---- */
+V.finance=()=>{const w=h("div",{class:"view"},head("finance","Founder-entered numbers only. All figures are estimates."));const F=S.fin,out=h("div"),list=h("div");
+ const cash=h("input",{type:"number",inputmode:"decimal",placeholder:"Cash available (₹)",value:F.cash||"",oninput:e=>{F.cash=+e.target.value;save();calc()}}),burn=h("input",{type:"number",inputmode:"decimal",placeholder:"Monthly spend (₹)",value:F.burn||"",oninput:e=>{F.burn=+e.target.value;save();calc()}});
+ const n=h("input",{placeholder:"Budget line (e.g. Design software)"}),a=h("input",{type:"number",inputmode:"decimal",placeholder:"Amount (₹)"});
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Runway calculator"),cash,burn,out),
+  h("div",{class:"card"},h("div",{class:"ch"},"Budget plan"),n,a,h("button",{class:"btn",onclick:()=>{if(!n.value.trim()||!a.value)return toast("Name and amount");F.lines.push({id:uid(),n:n.value.trim(),a:+a.value});n.value=a.value="";save();calc()}},"Add line"),list),
+  h("div",{class:"chips"},[["Pre-seed budget","Help me structure a realistic pre-seed budget for a concept-stage vehicle startup. Use my lines. Label estimates."],["Cost risks","List hidden cost risks for early-stage automotive development."]].map(p=>h("button",{class:"chip",onclick:()=>aiSheet(p[0],p[1]+" Lines: "+F.lines.map(l=>l.n+" "+l.a).join(", ").slice(0,600),"finance","")},"✦ "+p[0]))));
+ function calc(){const tot=F.lines.reduce((s,l)=>s+l.a,0);out.textContent="";
+  out.append(h("div",{class:"g2"},mm("Runway (months)",F.burn>0?(F.cash/F.burn).toFixed(1):"—"),mm("Budget total ₹",fmt(tot))));
+  if(tot>F.cash&&F.cash>0)out.append(h("div",{class:"banner"},"Planned budget exceeds available cash by ₹"+fmt(tot-F.cash)+"."));
+  list.textContent="";if(!F.lines.length)list.append(h("div",{class:"empty"},"No budget lines yet."));
+  F.lines.forEach(l=>list.append(h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,l.n),h("span",0,"₹"+fmt(l.a))),h("div",{class:"acts"},h("button",{class:"no",onclick:()=>{F.lines=F.lines.filter(x=>x.id!==l.id);save();calc()}},"Remove")))))}
+ calc();return w};
+
+/* ---- Investor ---- */
+V.investor=()=>{const w=h("div",{class:"view"},head("investor","Prepare honestly. Never overclaim."));
+ w.append(h("div",{class:"banner"},"Do not state funding, traction, prototypes or partners that do not exist. Honest concept-stage stories are credible."),
+  h("div",{class:"card"},h("div",{class:"ch"},"Readiness checklist",h("span",0,pct(INVCHK,S.inv.checks)+"%")),checks(INVCHK,S.inv.checks)),
+  h("div",{class:"chips"},[["Honest one-pager","Write an honest one-page investor brief for CRIST Motors at concept stage. Include what does not exist yet."],["Investor Q&A","List 10 tough investor questions and honest answers for a concept-stage vehicle startup."],["Cold email","Draft a short honest outreach email to an angel investor. Concept stage. No false claims."]].map(p=>h("button",{class:"chip",onclick:()=>aiSheet(p[0],p[1],"investor","investor")},"✦ "+p[0]))));
+ return w};
+
+/* ---- Knowledge ---- */
+V.knowledge=()=>{const w=h("div",{class:"view"},head("knowledge","Ground truth the AI and you rely on. Keep it accurate."));const k=h("input",{placeholder:"Topic"}),v=h("textarea",{placeholder:"What is true / assumed?"}),tg=h("select",0,["Fact","Assumption","Idea"].map(x=>h("option",0,x))),list=h("div");
+ w.append(h("div",{class:"card"},k,v,tg,h("button",{class:"btn",onclick:()=>{if(!k.value.trim())return;S.facts.unshift({id:uid(),k:k.value.trim(),v:v.value,tag:tg.value});k.value=v.value="";save();draw()}},"Add")),list);
+ function draw(){list.textContent="";S.facts.forEach(f=>list.append(h("div",{class:"row"},h("div",{class:"rh"},h("strong",0,f.k),tagEl(f.tag)),h("div",{class:"rd"},f.v),h("div",{class:"acts"},h("button",{class:"no",onclick:()=>{S.facts=S.facts.filter(x=>x.id!==f.id);save();draw()}},"Delete")))))}
+ draw();return w};
+
+/* ---- Reports ---- */
+function reportText(){const o=S.tasks.filter(t=>!t.done);return `CRIST MOTORS — STATUS REPORT\nDate: ${new Date().toLocaleDateString()}\nStage: Concept (no prototype, factory or confirmed funding unless stated by founder)\n\nOPEN TASKS (${o.length})\n${o.map(t=>`- [${t.pri}] ${t.title}${t.due?" (due "+t.due+")":""}`).join("\n")||"- none"}\n\nPROJECTS\n${S.projects.map(p=>`- ${p.title}: ${p.st}, ${p.pct}%`).join("\n")||"- none"}\n\nDECISIONS (${S.decisions.length})\n${S.decisions.slice(0,8).map(d=>"- "+d.t+" → "+(d.c||"open")).join("\n")}\n\nAPPROVALS: ${S.approvals.filter(a=>a.st==="Pending").length} pending\n\nGT-01 checklist: ${pct(GTCHK,S.gt.checks)}% | Investor checklist: ${pct(INVCHK,S.inv.checks)}% (self-assessed)\n`}
+V.reports=()=>{const w=h("div",{class:"view"},head("reports","Generate, copy and download reports."));const t=reportText();
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Status report"),h("pre",{class:"rd",style:"white-space:pre-wrap"},t),h("div",{class:"acts"},h("button",{class:"btn",onclick:()=>copy(t)},"Copy"),h("button",{class:"b2",onclick:()=>dl("crist-report.txt",t)},"Download"),h("button",{class:"b2",onclick:()=>aiSheet("Executive summary","Write a 6-line executive summary of this report. "+t.slice(0,1200),"chief","")},"✦ AI summary"))));return w};
+function dl(n,t,type="text/plain"){const a=h("a",{href:URL.createObjectURL(new Blob([t],{type})),download:n});a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+
+/* ---- Settings ---- */
+V.settings=()=>{const w=h("div",{class:"view"},head("settings","Personalise, back up and test the connection."));
+ const nm=h("input",{value:S.user,oninput:e=>{S.user=e.target.value||"Founder";save()}}),ap=h("input",{value:S.api,oninput:e=>{S.api=e.target.value.trim();save()}}),res=h("div",{class:"rd"});
+ const sw=(l,k,f)=>h("label",{class:"chk"},h("input",{type:"checkbox",checked:S[k],onchange:e=>{S[k]=e.target.checked;f();save()}}),h("span",0,l));
+ w.append(h("div",{class:"card"},h("div",{class:"ch"},"Profile"),nm,sw("Compact density","compact",applyPrefs),sw("Calm mode (reduce animation)","calm",applyPrefs)),
+  h("div",{class:"card"},h("div",{class:"ch"},"AI backend"),ap,h("button",{class:"b2",onclick:async()=>{res.textContent="Testing…";const ok=await ping();res.textContent=ok?"✅ Worker online":"❌ Not reachable. Check the URL and Worker deployment."}},"Test connection"),res,h("p",{class:"rd"},"The Gemini key stays in Cloudflare secrets. It is never in this page.")),
+  h("div",{class:"card"},h("div",{class:"ch"},"Backup & recovery"),h("div",{class:"acts"},h("button",{class:"btn",onclick:()=>dl("crist-backup-"+today()+".json",JSON.stringify(S,null,2),"application/json")},"Export backup"),
+   h("label",{class:"b2"},"Import backup",h("input",{type:"file",accept:".json",style:"display:none",onchange:e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{S=Object.assign(DEF(),JSON.parse(t));save();toast("Backup restored");applyPrefs();go("overview")}catch(x){toast("Invalid backup file")}})}}))),
+   h("button",{class:"no",style:"margin-top:10px",onclick:()=>{if(confirm("Erase ALL local data? Export a backup first.")){S=DEF();save();applyPrefs();go("overview")}}},"Erase all data")),
+  h("div",{class:"card"},h("div",{class:"ch"},"Shortcuts"),h("p",{class:"rd"},"Ctrl/⌘ + K or / : search everything\nEsc : close panels")),
+  h("div",{class:"card"},h("div",{class:"ch"},"Activity log"),S.logs.slice(0,25).map(l=>h("div",{class:"rd"},"• "+new Date(l.t).toLocaleString()+" — "+l.m))));return w};
+
+/* ---- register generic department modules ---- */
+const P=(l,t)=>[l,t];
+V.research=recordsView("research",{sub:"Capture findings with sources. Tag what is fact vs idea.",url:true,role:"research",ph:"Research topic",prompts:[P("Research plan","Create a 2-week research plan for CRIST Motors: key questions, source types, outputs."),P("Competitor scan","List what to research about competing luxury EV makers and how to compare them fairly.")]});
+V.tech=recordsView("tech",{sub:"Engineering questions, experiments and technical risks.",role:"cto",ph:"Technical topic",banner:"Concept-stage lab notes. Nothing here is validated technology.",prompts:[P("Powertrain options","Compare EV, hybrid and ICE options for a luxury grand tourer concept with pros, cons and unknowns."),P("Test plan","Suggest low-cost ways to test GT-01 assumptions before building anything.")]});
+V.aidev=recordsView("aidev",{sub:"Plan the CRIST AI platform: features, data, safety and roadmap.",role:"cto",ph:"AI feature or idea",prompts:[P("AI roadmap","Propose a realistic 6-month roadmap for improving the CRIST AI assistant using only free or low-cost tools."),P("Safety rules","Suggest safety and honesty rules for a business AI assistant.")]});
+V.chip=recordsView("chip",{sub:"Research notes for the proposed CRIST Chip.",role:"cto",ph:"Chip research topic",banner:"CRIST Chip is a concept that requires research, engineering and validation. It does not exist as a product.",prompts:[P("Research path","Outline an honest research path for a vehicle-control and safety chip concept: skills, partners, standards, cost, timeline unknowns."),P("Use existing chips","Explain how a startup could prototype vehicle control using existing off-the-shelf automotive-grade components before any custom chip.")]});
+V.innovation=recordsView("innovation",{sub:"Product ideas for cars, motorcycles and mobility. Idea box with AI help.",role:"product",ph:"Product idea",prompts:[P("10 ideas","Suggest 10 original product ideas for a luxury mobility brand, each with a one-line rationale."),P("Motorcycle concept","Suggest a concept direction for a first CRIST motorcycle and the key unknowns.")]});
+V.brand=recordsView("brand",{sub:"Brand story, naming, campaigns and content.",role:"brand",ph:"Brand idea",prompts:[P("Brand story","Write a short honest brand story for CRIST Motors at concept stage."),P("Tagline ideas","Suggest 12 tagline options for a luxury automotive brand, varied in tone."),P("Content calendar","Create a 4-week social content calendar for a concept-stage automotive brand.")]});
+V.expansion=recordsView("expansion",{sub:"Market, regulation and partner research by region.",role:"strategy",ph:"Region or market",url:true,prompts:[P("Market order","Suggest how to prioritise markets for a luxury EV startup and what data to gather.") ,P("Regulation checklist","List regulation categories to research before selling vehicles in a new country.")]});
+
+/* ---- chat modules ---- */
+V.ai=chatView("ai",Object.keys(ROLES),"cofounder",[["Honest summary","Summarize CRIST Motors honestly in 5 lines."],["Top risks","List the 5 biggest risks for my startup at this stage."],["Next 30 days","Give me a focused plan for the next 30 days."]]);
+V.cofounder=chatView("cofounder",["cofounder"],"cofounder",[["Challenge my idea","I will describe an idea next. Ask me 5 hard questions about it first."],["First product?","Should my first product be a car, motorcycle or software? Give a recommendation."],["What am I missing?","What critical things am I probably missing at concept stage?"]]);
+
+/* extra record lists under Strategy and Investor */
+const stratRec=recordsView("strategy",{sub:"",role:"strategy",ph:"Strategic note"});
+const _s=V.strategy;V.strategy=()=>{const w=_s();const r=stratRec();r.firstChild.remove();r.firstChild.remove();w.append(r);return w};
+const invRec=recordsView("investor",{sub:"",role:"investor",ph:"Investor, event or note"});
+const _i=V.investor;V.investor=()=>{const w=_i();const r=invRec();r.firstChild.remove();r.firstChild.remove();w.append(r);return w};
+
+/* ============ NAV / ROUTER ============ */
+function go(id){if(!V[id])id="overview";cur=id;location.hash="#/"+id;const m=$("#main");m.textContent="";
+ try{m.append(V[id]())}catch(e){m.append(h("div",{class:"card"},"Something went wrong loading this section: "+e.message))}
+ document.querySelectorAll("[data-m]").forEach(b=>b.classList.toggle("act",b.dataset.m===id));window.scrollTo(0,0)}
+function buildNav(){const s=$("#side");s.textContent="";s.append(h("span",{class:"brand"},"CRIST AI"));
+ GROUPS.forEach(([g,ids])=>{s.append(h("div",{class:"gl"},g));ids.forEach(id=>s.append(h("button",{class:"mi","data-m":id,onclick:()=>go(id)},M[id][1]+"  "+M[id][0])))});
+ const b=$("#bot");b.textContent="";[["overview","Home"],["ai","AI"],["tasks","Tasks"],["approvals","Approve"]].forEach(([id,l])=>b.append(h("button",{class:"nb","data-m":id,onclick:()=>go(id)},h("i",0,M[id][1]),l)));
+ b.append(h("button",{class:"nb",onclick:menu},h("i",0,"☰"),"More"))}
+function menu(){const c=h("div");GROUPS.forEach(([g,ids])=>{c.append(h("div",{class:"gl"},g));ids.forEach(id=>c.append(h("button",{class:"mi",onclick:()=>{ov.remove();go(id)}},M[id][1]+"  "+M[id][0])))});const ov=sheet(c)}
+
+/* search palette */
+function palette(){const inp=h("input",{placeholder:"Search departments, tasks, notes…",autofocus:true}),res=h("div");let sel=0,items=[];
+ const ov=sheet([inp,res],"pal");
+ function run(){const q=inp.value.toLowerCase().trim();items=[];
+  Object.keys(M).forEach(k=>{if(!q||M[k][0].toLowerCase().includes(q))items.push([M[k][1]+" "+M[k][0],"Go",()=>go(k)])});
+  if(q){S.tasks.forEach(t=>{if(t.title.toLowerCase().includes(q))items.push(["✅ "+t.title,"Task",()=>go("tasks")])});
+   Object.keys(S.records).forEach(k=>S.records[k].forEach(r=>{if((r.title+r.body).toLowerCase().includes(q))items.push(["📝 "+r.title,M[k][0].split(" ")[0],()=>go(k)])}));
+   S.decisions.forEach(d=>{if(d.t.toLowerCase().includes(q))items.push(["⚖️ "+d.t,"Decision",()=>go("decisions")])});
+   S.facts.forEach(f=>{if((f.k+f.v).toLowerCase().includes(q))items.push(["📚 "+f.k,"Fact",()=>go("knowledge")])})}
+  items=items.slice(0,14);sel=0;res.textContent="";items.forEach((it,i)=>res.append(h("button",{class:"mi"+(i?"":" sel"),onclick:()=>{ov.remove();it[2]()}},it[0],h("small",0,it[1]))));
+  if(!items.length)res.append(h("div",{class:"empty"},"No results."))}
+ inp.oninput=run;inp.onkeydown=e=>{if(e.key==="Enter"&&items[sel]){ov.remove();items[sel][2]()}};run();setTimeout(()=>inp.focus(),50)}
+
+/* notifications */
+function notes(){const n=[],t=today();
+ S.tasks.filter(x=>!x.done&&x.due&&x.due<t).forEach(x=>n.push(["⏰ Overdue: "+x.title,"tasks"]));
+ S.tasks.filter(x=>!x.done&&x.due===t).forEach(x=>n.push(["📅 Due today: "+x.title,"tasks"]));
+ S.approvals.filter(a=>a.st==="Pending").forEach(a=>n.push(["🛡️ Awaiting your approval: "+a.title,"approvals"]));
+ S.decisions.filter(d=>d.rv&&d.rv<=t).forEach(d=>n.push(["⚖️ Decision review due: "+d.t,"decisions"]));return n}
+function bell(){const c=notes().length,b=$("#bdg");if(!b)return;b.style.display=c?"grid":"none";b.textContent=c}
+function showNotes(){const n=notes(),c=h("div",0,h("div",{class:"ch"},"Notifications"));
+ if(!n.length)c.append(h("div",{class:"empty"},"All clear. Nothing needs attention."));
+ n.forEach(x=>c.append(h("button",{class:"mi",onclick:()=>{ov.remove();go(x[1])}},x[0])));const ov=sheet(c)}
+
+/* status ping */
+async function ping(){try{const r=await fetch(S.api);const d=await r.json();const ok=d.status==="online";setSt(ok);return ok}catch(e){setSt(false);return false}}
+function setSt(ok){$("#dot").className="dot "+(ok?"on":"off");$("#stx").textContent=ok?"AI online":"AI offline"}
+function applyPrefs(){document.body.classList.toggle("compact",!!S.compact);document.body.classList.toggle("calm",!!S.calm)}
+
+/* background */
+(function(){const c=$("#bgc"),x=c.getContext("2d");let w,hh,P=[];
+ function sz(){w=c.width=innerWidth;hh=c.height=innerHeight;P=[];for(let i=0;i<Math.min(55,w*hh/18000|0);i++)P.push({x:Math.random()*w,y:Math.random()*hh,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3})}
+ function f(){x.clearRect(0,0,w,hh);if(!S.calm){for(let i=0;i<P.length;i++){const p=P[i];p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>w)p.vx*=-1;if(p.y<0||p.y>hh)p.vy*=-1;
+  x.beginPath();x.arc(p.x,p.y,1.4,0,6.3);x.fillStyle="rgba(44,196,255,.6)";x.fill();
+  for(let j=i+1;j<P.length;j++){const q=P[j],dx=p.x-q.x,dy=p.y-q.y,d=Math.hypot(dx,dy);if(d<110){x.beginPath();x.moveTo(p.x,p.y);x.lineTo(q.x,q.y);x.strokeStyle="rgba(44,196,255,"+.2*(1-d/110)+")";x.stroke()}}}}
+  requestAnimationFrame(f)}
+ addEventListener("resize",sz);sz();f()})();
+
+/* ============ BOOT ============ */
+load();applyPrefs();buildNav();
+$("#bSearch").onclick=palette;$("#bBell").onclick=showNotes;
+addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();palette()}
+ else if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();palette()}
+ else if(e.key==="Escape")document.querySelectorAll(".ov").forEach(o=>o.remove())});
+addEventListener("hashchange",()=>{const id=location.hash.replace("#/","");if(id&&id!==cur&&V[id])go(id)});
+["LOADING FOUNDER GUARDRAILS…","CONNECTING SECURE AI WORKER…","CONCEPT-STAGE MODE ACTIVE"].forEach((l,i)=>setTimeout(()=>$("#btx").textContent=l,i*520));
+setTimeout(()=>$("#boot").classList.add("off"),1750);
+go(location.hash.replace("#/","")||"overview");bell();ping();setInterval(ping,60000);
+</script>
+</body>
+</html>
