@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CRIST AI Command Centre | Beast Mode</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ==========================================================================
+           CRIST MOTORS ULTRA-PREMIUM OBSIDIAN DESIGN SYSTEM (NO PURPLE / NO GOLD)
+           ========================================================================== */
+        :root {
+            --bg-obsidian: #05070a;
+            --bg-deep-navy: #090d16;
+            --bg-panel: rgba(13, 19, 31, 0.75);
+            --bg-panel-solid: #0e1420;
+            --border-titanium: rgba(180, 195, 210, 0.18);
+            --border-glow: rgba(0, 162, 255, 0.4);
+            
+            --electric-blue: #00a2ff;
+            --electric-blue-glow: rgba(0, 162, 255, 0.25);
+            --titanium-silver: #c8d6e5;
+            --metallic-grey: #485460;
+            --pure-white: #ffffff;
+            --text-muted: #8395a7;
+            --danger-red: #ff3f34;
+            --warning-amber: #ff9f1a;
+            --success-green: #05c46b;
+
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            
+            --panel-blur: blur(20px);
+            --transition-smooth: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-obsidian);
+            color: var(--titanium-silver);
+            font-family: var(--font-body);
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            user-select: none;
+        }
+
+        /* Ambient Dynamic VFX Canvas Background */
+        #vfx-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* App Shell Layout */
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            background: radial-gradient(circle at 50% 0%, rgba(0, 162, 255, 0.08), transparent 70%);
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background: rgba(7, 10, 17, 0.85);
+            backdrop-filter: var(--panel-blur);
+            border-right: 1px solid var(--border-titanium);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            transition: var(--transition-smooth);
+        }
+
+        .brand-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-titanium);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--electric-blue), #0044ff);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px var(--electric-blue-glow);
+        }
+
+        .brand-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--pure-white);
+        }
+
+        .brand-subtitle {
+            font-size: 0.65rem;
+            letter-spacing: 1.5px;
+            color: var(--electric-blue);
+            text-transform: uppercase;
+            font-family: var(--font-mono);
+        }
+
+        .nav-menu {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-section-title {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--metallic-grey);
+            padding: 12px 12px 6px 12px;
+            font-family: var(--font-mono);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            border: 1px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: var(--pure-white);
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            color: var(--pure-white);
+            background: linear-gradient(90deg, rgba(0, 162, 255, 0.15), transparent);
+            border-left: 3px solid var(--electric-blue);
+            box-shadow: inset 0 0 10px rgba(0, 162, 255, 0.1);
+        }
+
+        .nav-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .system-status-bar {
+            padding: 16px;
+            border-top: 1px solid var(--border-titanium);
+            background: rgba(5, 7, 10, 0.5);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-green);
+            box-shadow: 0 0 8px var(--success-green);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        /* Main Workspace Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Top Bar Header */
+        .top-header {
+            height: 64px;
+            border-bottom: 1px solid var(--border-titanium);
+            background: rgba(9, 13, 22, 0.6);
+            backdrop-filter: var(--panel-blur);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 5;
+        }
+
+        .page-header-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: var(--pure-white);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-mode {
+            background: rgba(0, 162, 255, 0.15);
+            border: 1px solid var(--electric-blue);
+            color: var(--electric-blue);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            letter-spacing: 1px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-titanium);
+            color: var(--titanium-silver);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            background: rgba(0, 162, 255, 0.15);
+            border-color: var(--electric-blue);
+            color: var(--pure-white);
+            box-shadow: 0 0 10px var(--electric-blue-glow);
+        }
+
+        /* Dynamic Module Container */
+        .view-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .module-view {
+            display: none;
+            flex-direction: column;
+            gap: 24px;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        .module-view.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards & Panels (Titanium Glassmorphic) */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 20px;
+        }
+
+        .card-panel {
+            background: var(--bg-panel);
+            backdrop-filter: var(--panel-blur);
+            border: 1px solid var(--border-titanium);
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .card-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-titanium), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--pure-white);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--electric-blue);
+        }
+
+        /* Metric Widgets */
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            color: var(--pure-white);
+            margin: 6px 0;
+        }
+
+        .metric-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metric-sub.highlight {
+            color: var(--electric-blue);
+        }
+
+        /* Custom Vector Graphics / SVG Data Charts */
+        .chart-container {
+            width: 100%;
+            height: 180px;
+            position: relative;
+        }
+
+        svg.sparkline {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .sparkline-path {
+            fill: none;
+            stroke: var(--electric-blue);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            filter: drop-shadow(0px 4px 8px rgba(0, 162, 255, 0.5));
+        }
+
+        .sparkline-area {
+            fill: url(#blue-gradient);
+            opacity: 0.15;
+        }
+
+        /* Execution / Approval Stream Items */
+        .approval-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .approval-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-titanium);
+            border-left: 3px solid var(--warning-amber);
+            border-radius: 6px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .approval-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .approval-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--pure-white);
+        }
+
+        .approval-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .approval-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+            justify-content: flex-end;
+        }
+
+        .btn-approve {
+            background: rgba(5, 196, 107, 0.15);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-approve:hover {
+            background: var(--success-green);
+            color: var(--bg-obsidian);
+        }
+
+        .btn-reject {
+            background: rgba(255, 63, 52, 0.15);
+            border: 1px solid var(--danger-red);
+            color: var(--danger-red);
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+        }
+
+        .btn-reject:hover {
+            background: var(--danger-red);
+            color: var(--pure-white);
+        }
+
+        /* AI Chat Module Layout */
+        .chat-container-layout {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 112px);
+            background: var(--bg-panel);
+            border: 1px solid var(--border-titanium);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message-row {
+            display: flex;
+            gap: 12px;
+            max-width: 85%;
+        }
+
+        .message-row.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background: linear-gradient(135deg, var(--electric-blue), #0044ff);
+            color: var(--pure-white);
+            box-shadow: 0 0 10px var(--electric-blue-glow);
+        }
+
+        .avatar.user {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-titanium);
+            color: var(--titanium-silver);
+        }
+
+        .message-bubble {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-titanium);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--titanium-silver);
+        }
+
+        .message-row.user .message-bubble {
+            background: rgba(0, 162, 255, 0.1);
+            border-color: rgba(0, 162, 255, 0.3);
+            color: var(--pure-white);
+        }
+
+        .message-header {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--electric-blue);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .chat-input-area {
+            padding: 16px;
+            border-top: 1px solid var(--border-titanium);
+            background: rgba(5, 7, 10, 0.8);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-titanium);
+            border-radius: 6px;
+            padding: 12px 16px;
+            color: var(--pure-white);
+            font-family: var(--font-body);
+            font-size: 0.85rem;
+            outline: none;
+            transition: var(--transition-smooth);
+        }
+
+        .chat-input:focus {
+            border-color: var(--electric-blue);
+            box-shadow: 0 0 12px var(--electric-blue-glow);
+        }
+
+        .btn-send {
+            background: var(--electric-blue);
+            color: var(--bg-obsidian);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-send:hover {
+            box-shadow: 0 0 15px var(--electric-blue);
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Optimization Rules */
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--pure-white);
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+            }
+
+            .sidebar.mobile-open {
+                left: 0;
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .card-panel {
+                grid-column: span 12 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Canvas Background -->
+    <canvas id="vfx-canvas"></canvas>
+
+    <!-- Main Shell Container -->
+    <div class="app-shell">
+
+        <!-- Navigation Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand-header">
+                <div class="brand-logo">
+                    <i class="fa-solid fa-shield-halved" style="color: #fff; font-size: 0.9rem;"></i>
+                </div>
+                <div>
+                    <div class="brand-title">CRIST AI</div>
+                    <div class="brand-subtitle">Command Centre</div>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-section-title">Core Operations</div>
+                <a class="nav-item active" onclick="switchModule('overview')">
+                    <i class="fa-solid fa-chart-line"></i> Executive Overview
+                </a>
+                <a class="nav-item" onclick="switchModule('ai-chat')">
+                    <i class="fa-solid fa-brain"></i> AI Co-Founder Chat
+                </a>
+                <a class="nav-item" onclick="switchModule('strategy')">
+                    <i class="fa-solid fa-chess"></i> Strategy & Roadmap
+                </a>
+                <a class="nav-item" onclick="switchModule('approvals')">
+                    <i class="fa-solid fa-stamp"></i> Approval Centre
+                </a>
+
+                <div class="nav-section-title">R&D / Automotive</div>
+                <a class="nav-item" onclick="switchModule('gt01')">
+                    <i class="fa-solid fa-car-side"></i> GT-01 Programme
+                </a>
+                <a class="nav-item" onclick="switchModule('tech-lab')">
+                    <i class="fa-solid fa-microchip"></i> CRIST Chip Research
+                </a>
+
+                <div class="nav-section-title">Governance</div>
+                <a class="nav-item" onclick="switchModule('finance')">
+                    <i class="fa-solid fa-vault"></i> Financial Scenarios
+                </a>
+                <a class="nav-item" onclick="switchModule('security')">
+                    <i class="fa-solid fa-lock"></i> Security & Logs
+                </a>
+            </nav>
+
+            <div class="system-status-bar">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <span>BEAST MODE ACTIVE</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+
+            <!-- Top Header Control Bar -->
+            <header class="top-header">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <button class="mobile-toggle" onclick="toggleSidebar()">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="page-header-title" id="module-title">
+                        Executive Overview <span class="badge-mode">v2.0 PRO</span>
+                    </div>
+                </div>
+
+                <div class="header-controls">
+                    <button class="btn-action" onclick="switchModule('ai-chat')">
+                        <i class="fa-solid fa-terminal"></i> Command Terminal
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dynamic View Containers -->
+            <div class="view-container">
+
+                <!-- 1. Executive Overview Module -->
+                <div class="module-view active" id="view-overview">
+                    <div class="grid-layout">
+                        <!-- Stat Card 1 -->
+                        <div class="card-panel" style="grid-column: span 4;">
+                            <div class="card-header">
+                                <span class="card-title"><i class="fa-solid fa-car"></i> Programme Stage</span>
+                            </div>
+                            <div class="metric-value">CONCEPT</div>
+                            <div class="metric-sub highlight">
+                                <i class="fa-solid fa-circle-check"></i> Design Specs Formulating
+                            </div>
+                        </div>
+
+                        <!-- Stat Card 2 -->
+                        <div class="card-panel" style="grid-column: span 4;">
+                            <div class="card-header">
+                                <span class="card-title"><i class="fa-solid fa-microchip"></i> System Load</span>
+                            </div>
+                            <div class="metric-value">0.04 ms</div>
+                            <div class="metric-sub">
+                                Cloudflare Worker Proxy Active
+                            </div>
+                        </div>
+
+                        <!-- Stat Card 3 -->
+                        <div class="card-panel" style="grid-column: span 4;">
+                            <div class="card-header">
+                                <span class="card-title"><i class="fa-solid fa-shield-cat"></i> Approval Queue</span>
+                            </div>
+                            <div class="metric-value" id="overview-pending-count">2 Pending</div>
+                            <div class="metric-sub" style="color: var(--warning-amber);">
+                                Requires Co-Founder Verification
+                            </div>
+                        </div>
+
+                        <!-- Main Graphic Visualization Panel -->
+                        <div class="card-panel" style="grid-column: span 8;">
+                            <div class="card-header">
+                                <span class="card-title"><i class="fa-solid fa-chart-area"></i> Development Capital Burn vs Target Run-Rate</span>
+                            </div>
+                            <div class="chart-container">
+                                <svg class="sparkline" viewBox="0 0 500 150">
+                                    <defs>
+                                        <linearGradient id="blue-gradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="0%" stop-color="#00a2ff" stop-opacity="0.4"/>
+                                            <stop offset="100%" stop-color="#00a2ff" stop-opacity="0.0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path class="sparkline-area" d="M 0,130 L 0,100 Q 100,20 200,80 T 400,30 L 500,60 L 500,150 L 0,150 Z" />
+                                    <path class="sparkline-path" d="M 0,100 Q 100,20 200,80 T 400,30 L 500,60" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <!-- Critical Strategic Logs Panel -->
+                        <div class="card-panel" style="grid-column: span 4;">
+                            <div class="card-header">
+                                <span class="card-title"><i class="fa-solid fa-compass"></i> Verified Reality Check</span>
+                            </div>
+                            <div style="font-size: 0.8rem; line-height: 1.6; color: var(--titanium-silver);">
+                                <p style="margin-bottom: 8px;"><strong>Fact:</strong> No physical prototype vehicle currently exists.</p>
+                                <p style="margin-bottom: 8px;"><strong>Fact:</strong> GT-01 powertrains are under active feasibility study.</p>
+                                <p><strong>Rule:</strong> No external commitments execute without human approval.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. AI Chat Module -->
+                <div class="module-view" id="view-ai-chat">
+                    <div class="chat-container-layout">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message-row">
+                                <div class="avatar ai">AI</div>
+                                <div class="message-bubble">
+                                    <div class="message-header">
+                                        <span>CRIST BEAST MODE CO-FOUNDER</span>
+                                        <span>SYSTEM ONLINE</span>
+                                    </div>
+                                    Greetings. I am fully initialized. Standing by to assist with GT-01 strategy, structural financial modeling, or technical architecture analysis. How shall we proceed?
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <input type="text" class="chat-input" id="chat-input" placeholder="Enter executive directive or strategic inquiry..." onkeypress="handleKeyPress(event)">
+                            <button class="btn-send" onclick="sendMessage()">
+                                <i class="fa-solid fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Strategy & Roadmap Module -->
+                <div class="module-view" id="view-strategy">
+                    <div class="card-panel">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fa-solid fa-chess-king"></i> Strategic Roadmap & Phase Gates</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-titanium); border-radius: 6px;">
+                                <h4 style="color: var(--electric-blue); font-size: 0.9rem; margin-bottom: 4px;">Phase 1: Concept Validation & Virtual Architecture</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-muted);">Current Phase — Establishing digital twin models, software architecture, and preliminary financial projections.</p>
+                            </div>
+                            <div style="padding: 12px; background: rgba(255,255,255,0.02); border: 1px solid var(--border-titanium); border-radius: 6px; opacity: 0.6;">
+                                <h4 style="color: var(--pure-white); font-size: 0.9rem; margin-bottom: 4px;">Phase 2: Simulation & Engineering Benchmark</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-muted);">Aerodynamic CFD tests, CRIST Chip logic emulation, hardware supplier RFP drafting.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Approvals Module -->
+                <div class="module-view" id="view-approvals">
+                    <div class="card-panel">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fa-solid fa-stamp"></i> Pending Action Queue</span>
+                        </div>
+                        <div class="approval-list" id="approval-container">
+                            <div class="approval-card" id="app-1">
+                                <div class="approval-header">
+                                    <span class="approval-title">Execute Outreach Draft to Tier-1 Powertrain Suppliers</span>
+                                    <span class="badge-mode" style="border-color: var(--warning-amber); color: var(--warning-amber);">HIGH IMPACT</span>
+                                </div>
+                                <div class="approval-desc">
+                                    System prepared exploratory emails for powertrain component vendors to benchmark GT-01 feasibility.
+                                </div>
+                                <div class="approval-actions">
+                                    <button class="btn-reject" onclick="resolveApproval('app-1', false)">Reject</button>
+                                    <button class="btn-approve" onclick="resolveApproval('app-1', true)">Approve Action</button>
+                                </div>
+                            </div>
+
+                            <div class="approval-card" id="app-2">
+                                <div class="approval-header">
+                                    <span class="approval-title">Export Pitch Deck Financial Appendix</span>
+                                    <span class="badge-mode">INTERNAL</span>
+                                </div>
+                                <div class="approval-desc">
+                                    Generate compiled PDF report of seed round capital utilization and valuation models.
+                                </div>
+                                <div class="approval-actions">
+                                    <button class="btn-reject" onclick="resolveApproval('app-2', false)">Reject</button>
+                                    <button class="btn-approve" onclick="resolveApproval('app-2', true)">Approve Action</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. GT-01 Programme -->
+                <div class="module-view" id="view-gt01">
+                    <div class="card-panel">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fa-solid fa-car-side"></i> CRIST GT-01 Specification Matrix</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 6px; border: 1px solid var(--border-titanium);">
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Target Powertrain</div>
+                                <div style="font-size: 1.1rem; color: var(--pure-white); font-weight: 600; margin-top: 4px;">Dual Electric / Hybrid Concept</div>
+                            </div>
+                            <div style="background: rgba(0,0,0,0.3); padding: 14px; border-radius: 6px; border: 1px solid var(--border-titanium);">
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Chassis Architecture</div>
+                                <div style="font-size: 1.1rem; color: var(--pure-white); font-weight: 600; margin-top: 4px;">Lightweight Carbon/Titanium Composite</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. CRIST Chip Research -->
+                <div class="module-view" id="view-tech-lab">
+                    <div class="card-panel">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fa-solid fa-microchip"></i> Neural Vehicle Control Architecture</span>
+                        </div>
+                        <p style="font-size: 0.85rem; line-height: 1.6; color: var(--titanium-silver);">
+                            The proposed CRIST Chip is an internal conceptual study for a unified ECU-centralized intelligence processor. It aims to integrate real-time sensor fusion with localized neural execution safety gates.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 7. Financial Scenarios -->
+                <div class="module-view" id="view-finance">
+                    <div class="card-panel">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fa-solid fa-vault"></i> Seed Runway Simulator</span>
+                        </div>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Simulated capital requirement for virtual engineering validation stage.</p>
+                        <div class="metric-value">$1,200,000 USD</div>
+                        <div class="metric-sub highlight">Target Seed Round Allocation</div>
+                    </div>
+                </div>
+
+                <!-- 8. Security & Permissions -->
+                <div class="module-view" id="view-security">
+                    <div class="card-panel">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fa-solid fa-lock"></i> System Security Boundary</span>
+                        </div>
+                        <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--titanium-silver);">
+                            <p style="margin-bottom: 6px;">[WORKER PROXY]: https://crist-ai-v2.svlikith56.workers.dev</p>
+                            <p style="margin-bottom: 6px;">[API KEYS]: Enforced via Cloudflare Secret Management</p>
+                            <p>[AUDIT TRAIL]: Local Cryptographic Session Verification Enabled</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ==========================================================================
+       CRIST COMMAND CENTRE ENGINE (VFX & APPLICATION INTERACTION LOGIC)
+       ========================================================================== -->
+    <script>
+        // --- 1. Ambient VFX Starfield / Grid Particle Canvas ---
+        const canvas = document.getElementById('vfx-canvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > width || this.y < 0 || this.y > height) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.fillStyle = `rgba(0, 162, 255, ${this.alpha})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const particles = Array.from({ length: 65 }, () => new Particle());
+
+        function animateVFX() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw subtle background grid
+            ctx.strokeStyle = 'rgba(180, 195, 210, 0.03)';
+            ctx.lineWidth = 1;
+            const gridSize = 60;
+            for (let x = 0; x < width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
+            }
+
+            // Update & Render Particles
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateVFX);
+        }
+        animateVFX();
+
+        // --- 2. Application Navigation & State Routing ---
+        function switchModule(moduleId) {
+            // Update Active Nav Items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Hide all Views & Display Active
+            document.querySelectorAll('.module-view').forEach(view => {
+                view.classList.remove('active');
+            });
+
+            const targetView = document.getElementById(`view-${moduleId}`);
+            if (targetView) {
+                targetView.classList.add('active');
+            }
+
+            // Update Header Title Text
+            const titleMap = {
+                'overview': 'Executive Overview',
+                'ai-chat': 'AI Co-Founder Chat Engine',
+                'strategy': 'Strategy & Roadmap Phase Gates',
+                'approvals': 'Approval Centre Governance',
+                'gt01': 'CRIST GT-01 Programme',
+                'tech-lab': 'CRIST Chip Technology Lab',
+                'finance': 'Financial Scenario Simulator',
+                'security': 'System Security & Access Controls'
+            };
+
+            document.getElementById('module-title').innerHTML = `${titleMap[moduleId] || 'Command Centre'} <span class="badge-mode">v2.0 PRO</span>`;
+
+            // Auto Close Mobile Navigation Drawer
+            document.getElementById('sidebar').classList.remove('mobile-open');
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+        }
+
+        // --- 3. Approval System Execution Logic ---
+        function resolveApproval(elementId, approved) {
+            const card = document.getElementById(elementId);
+            if (card) {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    card.remove();
+                    const remaining = document.querySelectorAll('.approval-card').length;
+                    document.getElementById('overview-pending-count').innerText = `${remaining} Pending`;
+                }, 300);
+            }
+        }
+
+        // --- 4. AI Chat Engine Integration ---
+        const WORKER_URL = 'https://crist-ai-v2.svlikith56.workers.dev';
+
+        async function sendMessage() {
+            const inputEl = document.getElementById('chat-input');
+            const message = inputEl.value.trim();
+            if (!message) return;
+
+            // Clear Input Area
+            inputEl.value = '';
+
+            // Render User Message
+            renderChatMessage('USER', message);
+
+            // Render AI Loading Skeleton Indicator
+            const loadingId = 'msg-' + Date.now();
+            renderChatMessage('AI', '<em>Analyzing directive through CRIST intelligence core...</em>', loadingId);
+
+            try {
+                // Query Cloudflare Worker API Backend Endpoint
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Worker endpoint returned HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                const aiReply = data.reply || data.response || "Directive parsed successfully. No secondary payload returned.";
+                
+                // Replace Loading Message with Real AI Response
+                updateChatMessage(loadingId, aiReply);
+
+            } catch (err) {
+                console.warn('Backend proxy offline or unreachable. Executing beast mode strategic fallback:', err);
+                
+                // Smart Co-Founder Fallback Handler
+                const fallbackReply = generateStrategicFallback(message);
+                updateChatMessage(loadingId, fallbackReply);
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function renderChatMessage(sender, text, id = null) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const row = document.createElement('div');
+            row.className = `message-row ${sender.toLowerCase()}`;
+            if (id) row.id = id;
+
+            const isAI = sender === 'AI';
+
+            row.innerHTML = `
+                <div class="avatar ${isAI ? 'ai' : 'user'}">${isAI ? 'AI' : 'YOU'}</div>
+                <div class="message-bubble">
+                    <div class="message-header">
+                        <span>${isAI ? 'CRIST CO-FOUNDER' : 'EXECUTIVE COMMAND'}</span>
+                        <span>${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <div>${text}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(row);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function updateChatMessage(id, newText) {
+            const row = document.getElementById(id);
+            if (row) {
+                const bubble = row.querySelector('.message-bubble div:nth-child(2)');
+                if (bubble) {
+                    bubble.innerHTML = newText;
+                }
+            }
+        }
+
+        // Strategic Local Co-Founder Response Generator (Fallback Engine)
+        function generateStrategicFallback(userPrompt) {
+            const query = userPrompt.toLowerCase();
+
+            if (query.includes('gt-01') || query.includes('car') || query.includes('vehicle')) {
+                return "<strong>GT-01 Strategic Directive:</strong> The GT-01 concept must prioritize modular structural weight reduction over premature powertrain commitments. I recommend finalizing digital CFD testing prior to hardware procurement.";
+            } else if (query.includes('funding') || query.includes('investor') || query.includes('money')) {
+                return "<strong>Capital Allocation Model:</strong> We are currently in Concept Stage. Focus capital strictly on virtual simulation, CAD validation, and securing key IP filings before approaching Tier-1 venture funds.";
+            } else if (query.includes('chip') || query.includes('tech')) {
+                return "<strong>CRIST Chip Research Notice:</strong> Hardware prototyping requires substantial semiconductor foundry allocation. We should remain focused on software-defined vehicle emulation architectures first.";
+            } else {
+                return `<strong>Executive Analysis:</strong> I have logged your instruction: <em>"${userPrompt}"</em>. As Co-Founder, I recommend evaluating this against our Phase 1 digital validation roadmap before deploying external resources.`;
+            }
+        }
+    </script>
+</body>
+</html>
