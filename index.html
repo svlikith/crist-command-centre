@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CRIST AI Command Centre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg-deep: #03050a;
+            --bg-panel: rgba(10, 14, 22, 0.82);
+            --bg-elevated: rgba(14, 20, 32, 0.9);
+            --border: rgba(180, 200, 220, 0.12);
+            --border-strong: rgba(0, 162, 255, 0.35);
+            --electric: #00a2ff;
+            --electric-dim: rgba(0, 162, 255, 0.15);
+            --electric-glow: rgba(0, 162, 255, 0.25);
+            --titanium: #c8d6e5;
+            --text-muted: #7a8ba0;
+            --success: #05c46b;
+            --warning: #ff9f1a;
+            --danger: #ff3f34;
+            --font-display: 'Cinzel', serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            --radius: 12px;
+            --transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: var(--titanium);
+            font-family: var(--font-body);
+            height: 100dvh;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* Ambient Background */
+        .ambient {
+            position: fixed;
+            inset: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 162, 255, 0.09), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(0, 80, 160, 0.06), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* App Shell */
+        .app {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            height: 100dvh;
+            width: 100%;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 268px;
+            background: rgba(6, 9, 15, 0.92);
+            backdrop-filter: blur(24px);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 30;
+        }
+
+        .brand {
+            padding: 22px 20px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #00a2ff, #0066cc);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px var(--electric-glow);
+            flex-shrink: 0;
+        }
+
+        .brand-mark i {
+            color: white;
+            font-size: 14px;
+        }
+
+        .brand-text h1 {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: white;
+            line-height: 1.2;
+        }
+
+        .brand-text span {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            letter-spacing: 1.8px;
+            color: var(--electric);
+            text-transform: uppercase;
+        }
+
+        .nav {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .nav-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            letter-spacing: 1.6px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            padding: 14px 12px 6px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 14px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-size: 0.84rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .nav-item i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: linear-gradient(90deg, rgba(0,162,255,0.18), transparent);
+            border-left: 3px solid var(--electric);
+            box-shadow: inset 0 0 12px rgba(0,162,255,0.08);
+        }
+
+        .status-bar {
+            padding: 16px;
+            border-top: 1px solid var(--border);
+            background: rgba(3,5,10,0.6);
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2.2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+
+        /* Main Area */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            height: 60px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(8, 12, 20, 0.7);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 22px;
+            flex-shrink: 0;
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            color: white;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            letter-spacing: 1.2px;
+            padding: 3px 9px;
+            border-radius: 4px;
+            background: var(--electric-dim);
+            border: 1px solid var(--electric);
+            color: var(--electric);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: var(--titanium);
+            padding: 8px 14px;
+            border-radius: 7px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .btn:hover {
+            background: var(--electric-dim);
+            border-color: var(--electric);
+            color: white;
+            box-shadow: 0 0 14px var(--electric-glow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(0,162,255,0.25), rgba(0,100,200,0.2));
+            border-color: var(--electric);
+            color: white;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .view {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeUp 0.35s ease;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 16px;
+        }
+
+        .card {
+            background: var(--bg-panel);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(180,200,220,0.25), transparent);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+
+        .card-title {
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: var(--electric);
+            font-size: 0.85rem;
+        }
+
+        .metric {
+            font-family: var(--font-mono);
+            font-size: 1.7rem;
+            font-weight: 600;
+            color: white;
+            margin: 4px 0 6px;
+        }
+
+        .metric-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+        }
+
+        /* Chat Interface */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100dvh - 140px);
+            min-height: 420px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px 4px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .msg {
+            display: flex;
+            gap: 12px;
+            max-width: 88%;
+            animation: fadeUp 0.3s ease;
+        }
+
+        .msg.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background: linear-gradient(135deg, #00a2ff, #0066cc);
+            color: white;
+            box-shadow: 0 0 12px var(--electric-glow);
+        }
+
+        .avatar.user {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--border);
+            color: var(--titanium);
+        }
+
+        .bubble {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+
+        .msg.user .bubble {
+            background: rgba(0,162,255,0.1);
+            border-color: rgba(0,162,255,0.25);
+        }
+
+        .bubble-meta {
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            color: white;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .chat-input:focus {
+            border-color: var(--electric);
+            box-shadow: 0 0 0 3px var(--electric-dim);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #00a2ff, #0077cc);
+            border: none;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            box-shadow: 0 0 20px var(--electric-glow);
+            transform: translateY(-1px);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Mobile */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--titanium);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 6px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 25;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                bottom: 0;
+                width: 270px;
+            }
+
+            .sidebar.open {
+                left: 0;
+            }
+
+            .overlay.open {
+                display: block;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card.span-4, .card.span-6, .card.span-8, .card.span-12 {
+                grid-column: span 1 !important;
+            }
+
+            .content {
+                padding: 16px;
+            }
+        }
+
+        /* Utility */
+        .span-3 { grid-column: span 3; }
+        .span-4 { grid-column: span 4; }
+        .span-6 { grid-column: span 6; }
+        .span-8 { grid-column: span 8; }
+        .span-12 { grid-column: span 12; }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+        }
+
+        .empty-state i {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            opacity: 0.4;
+            display: block;
+        }
+
+        .typing {
+            display: flex;
+            gap: 5px;
+            padding: 4px 0;
+        }
+
+        .typing span {
+            width: 6px;
+            height: 6px;
+            background: var(--electric);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+
+        .typing span:nth-child(2) { animation-delay: 0.15s; }
+        .typing span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-5px); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="ambient"></div>
+    <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">
+                <div class="brand-mark"><i class="fas fa-microchip"></i></div>
+                <div class="brand-text">
+                    <h1>CRIST AI</h1>
+                    <span>Command Centre</span>
+                </div>
+            </div>
+
+            <nav class="nav">
+                <div class="nav-label">Core</div>
+                <div class="nav-item active" data-view="overview" onclick="switchView('overview')">
+                    <i class="fas fa-th-large"></i> Executive Overview
+                </div>
+                <div class="nav-item" data-view="intelligence" onclick="switchView('intelligence')">
+                    <i class="fas fa-brain"></i> AI Intelligence
+                </div>
+                <div class="nav-item" data-view="cofounder" onclick="switchView('cofounder')">
+                    <i class="fas fa-user-tie"></i> Business Co-Founder
+                </div>
+
+                <div class="nav-label">Operations</div>
+                <div class="nav-item" data-view="strategy" onclick="switchView('strategy')">
+                    <i class="fas fa-chess"></i> Strategy Brain
+                </div>
+                <div class="nav-item" data-view="tasks" onclick="switchView('tasks')">
+                    <i class="fas fa-tasks"></i> Task Management
+                </div>
+                <div class="nav-item" data-view="approvals" onclick="switchView('approvals')">
+                    <i class="fas fa-check-double"></i> Approval Centre
+                </div>
+
+                <div class="nav-label">Automotive</div>
+                <div class="nav-item" data-view="gt01" onclick="switchView('gt01')">
+                    <i class="fas fa-car"></i> CRIST GT-01
+                </div>
+                <div class="nav-item" data-view="research" onclick="switchView('research')">
+                    <i class="fas fa-search"></i> Automotive Research
+                </div>
+                <div class="nav-item" data-view="competitors" onclick="switchView('competitors')">
+                    <i class="fas fa-binoculars"></i> Competitor Intel
+                </div>
+
+                <div class="nav-label">Business</div>
+                <div class="nav-item" data-view="funding" onclick="switchView('funding')">
+                    <i class="fas fa-hand-holding-usd"></i> Funding Strategy
+                </div>
+                <div class="nav-item" data-view="risk" onclick="switchView('risk')">
+                    <i class="fas fa-shield-alt"></i> Risk Management
+                </div>
+            </nav>
+
+            <div class="status-bar">
+                <div class="status-row">
+                    <div class="status-dot"></div>
+                    <span>SYSTEM ONLINE • BEAST MODE</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <main class="main">
+            <header class="header">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="page-title" id="pageTitle">
+                        Executive Overview
+                        <span class="badge">LIVE</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn" onclick="switchView('intelligence')">
+                        <i class="fas fa-comment-dots"></i> Chat
+                    </button>
+                </div>
+            </header>
+
+            <div class="content">
+                <!-- OVERVIEW -->
+                <div class="view active" id="view-overview">
+                    <div class="grid">
+                        <div class="card span-4">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fas fa-rocket"></i> Company Stage</div>
+                            </div>
+                            <div class="metric">Concept</div>
+                            <div class="metric-sub">Early development • No prototype yet</div>
+                        </div>
+                        <div class="card span-4">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fas fa-car-side"></i> Flagship</div>
+                            </div>
+                            <div class="metric">GT-01</div>
+                            <div class="metric-sub">Luxury Grand Tourer concept</div>
+                        </div>
+                        <div class="card span-4">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fas fa-microchip"></i> AI Status</div>
+                            </div>
+                            <div class="metric" style="color:var(--electric)">Online</div>
+                            <div class="metric-sub">Ready for strategic input</div>
+                        </div>
+
+                        <div class="card span-8">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fas fa-lightbulb"></i> Current Priority</div>
+                            </div>
+                            <p style="font-size:0.9rem;line-height:1.6;color:var(--titanium);">
+                                Focus remains on digital concept validation, competitive research, and building a coherent long-term strategy before any physical development or capital raise.
+                            </p>
+                        </div>
+
+                        <div class="card span-4">
+                            <div class="card-header">
+                                <div class="card-title"><i class="fas fa-exclamation-triangle"></i> Key Risk</div>
+                            </div>
+                            <p style="font-size:0.85rem;line-height:1.55;color:var(--text-muted);">
+                                Premature spending on hardware or manufacturing without validated digital prototypes.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI INTELLIGENCE / CHAT -->
+                <div class="view" id="view-intelligence">
+                    <div class="card span-12" style="padding:0;overflow:hidden;">
+                        <div class="chat-container" style="padding:18px;">
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="msg">
+                                    <div class="avatar ai">AI</div>
+                                    <div class="bubble">
+                                        <div class="bubble-meta">
+                                            <span>CRIST CO-FOUNDER</span>
+                                            <span>SYSTEM</span>
+                                        </div>
+                                        Ready. I operate as your business co-founder, chief of staff, and strategic intelligence system. Ask me anything about CRIST Motors, GT-01 strategy, competitors, funding approach, or next priorities.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chat-input-area">
+                                <input type="text" class="chat-input" id="chatInput" placeholder="Ask CRIST AI anything..." onkeydown="if(event.key==='Enter')sendMessage()">
+                                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other views (simple placeholders for now) -->
+                <div class="view" id="view-cofounder">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-user-tie"></i>
+                            Business Co-Founder mode is active in the AI Intelligence chat.<br>
+                            Switch to <strong>AI Intelligence</strong> to converse.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-strategy">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-chess"></i>
+                            Strategy Brain module ready.<br>
+                            Use the AI chat to generate short-term and long-term strategy recommendations.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-tasks">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-tasks"></i>
+                            Task Management will be connected in Phase 3.<br>
+                            Currently track priorities through the AI chat.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-approvals">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-check-double"></i>
+                            Approval Centre is prepared for Phase 3.<br>
+                            No pending external actions at this stage.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-gt01">
+                    <div class="card span-12">
+                        <div class="card-header">
+                            <div class="card-title"><i class="fas fa-car"></i> CRIST GT-01 Development</div>
+                        </div>
+                        <p style="font-size:0.9rem;line-height:1.65;margin-bottom:16px;">
+                            Flagship luxury grand tourer concept. Current status: pure concept stage. No physical prototype, no finalised powertrain decision, no validated engineering specifications.
+                        </p>
+                        <div class="metric-sub">Recommended next focus → Digital design brief + competitive benchmarking + powertrain research matrix.</div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-research">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-search"></i>
+                            Automotive Research module.<br>
+                            Ask the AI for competitor analysis, powertrain comparisons, or design trend research.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-competitors">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-binoculars"></i>
+                            Competitor Intelligence ready.<br>
+                            Request analysis of Ferrari, Aston Martin, McLaren, Lucid, Rimac or any specific model.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-funding">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            Funding Strategy module.<br>
+                            Ask for realistic capital roadmap recommendations for the concept stage.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="view" id="view-risk">
+                    <div class="card span-12">
+                        <div class="empty-state">
+                            <i class="fas fa-shield-alt"></i>
+                            Risk Management.<br>
+                            Request a current risk register or scenario analysis from the AI.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const WORKER_URL = "https://crist-ai-v2.svlikith56.workers.dev";
+
+        // View switching
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            const view = document.getElementById('view-' + viewId);
+            if (view) view.classList.add('active');
+
+            const navItem = document.querySelector(`.nav-item[data-view="${viewId}"]`);
+            if (navItem) navItem.classList.add('active');
+
+            // Update title
+            const titles = {
+                overview: 'Executive Overview',
+                intelligence: 'AI Intelligence',
+                cofounder: 'Business Co-Founder',
+                strategy: 'Strategy Brain',
+                tasks: 'Task Management',
+                approvals: 'Approval Centre',
+                gt01: 'CRIST GT-01 Development',
+                research: 'Automotive Research',
+                competitors: 'Competitor Intelligence',
+                funding: 'Funding Strategy',
+                risk: 'Risk Management'
+            };
+            document.getElementById('pageTitle').innerHTML = `${titles[viewId] || viewId} <span class="badge">LIVE</span>`;
+
+            closeSidebar();
+        }
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('open');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+
+        // Chat
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            input.value = '';
+
+            // User message
+            appendMessage('user', message);
+
+            // Loading
+            const loadingId = 'loading-' + Date.now();
+            appendMessage('ai', '<div class="typing"><span></span><span></span><span></span></div>', loadingId);
+
+            try {
+                const response = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                const reply = data.reply || data.response || "Directive received. No additional payload returned.";
+                updateMessage(loadingId, reply);
+            } catch (err) {
+                console.warn(err);
+                const fallback = generateFallback(message);
+                updateMessage(loadingId, fallback);
+            }
+
+            sendBtn.disabled = false;
+            input.focus();
+        }
+
+        function appendMessage(role, text, id = null) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = `msg ${role}`;
+            if (id) div.id = id;
+
+            const isAI = role === 'ai';
+            div.innerHTML = `
+                <div class="avatar ${isAI ? 'ai' : 'user'}">${isAI ? 'AI' : 'YOU'}</div>
+                <div class="bubble">
+                    <div class="bubble-meta">
+                        <span>${isAI ? 'CRIST CO-FOUNDER' : 'FOUNDER'}</span>
+                        <span>${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>
+                    <div class="bubble-content">${text}</div>
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateMessage(id, newText) {
+            const el = document.getElementById(id);
+            if (el) {
+                const content = el.querySelector('.bubble-content');
+                if (content) content.innerHTML = newText;
+            }
+        }
+
+        function generateFallback(prompt) {
+            const q = prompt.toLowerCase();
+            if (q.includes('gt-01') || q.includes('car') || q.includes('vehicle') || q.includes('design')) {
+                return `<strong>GT-01 Directive:</strong> Remain in digital validation phase. Prioritise concept clarity, competitive positioning, and modular architecture thinking before any hardware commitment.`;
+            }
+            if (q.includes('fund') || q.includes('investor') || q.includes('money') || q.includes('capital')) {
+                return `<strong>Capital Guidance:</strong> At concept stage the correct focus is intellectual property, digital prototypes, and a clear long-term vision — not premature fundraising rounds.`;
+            }
+            if (q.includes('chip') || q.includes('tech') || q.includes('ai system')) {
+                return `<strong>Technology Note:</strong> CRIST Chip and vehicle intelligence remain research directions. Software architecture and system thinking should precede any silicon discussion.`;
+            }
+            return `<strong>Executive Note:</strong> Instruction logged. Evaluate against current Phase 1 priorities (digital validation + strategic clarity) before allocating resources.`;
+        }
+
+        // Focus input on load
+        document.getElementById('chatInput')?.focus();
+    </script>
+</body>
+</html>
